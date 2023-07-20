@@ -1,4 +1,6 @@
-export function resize(renderer: unknown, camera: unknown, sizes: unknown) {
+import * as THREE from 'three'
+
+export function resize(renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveCamera, sizes: {width: number, height: number}) {
 
 window.addEventListener('resize', () =>
 {
@@ -19,7 +21,7 @@ window.addEventListener('resize', () =>
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 }
 
-export function cursor(sizes) {
+export function cursor(sizes: {width: number, height: number}) {
     // Cursor
     const cursor = {
         x: 0,
