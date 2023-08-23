@@ -1,5 +1,5 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { setupModel } from './setupModel';
+import { setupModel } from './SetupModel';
 
 async function loadData(path: string) {
 

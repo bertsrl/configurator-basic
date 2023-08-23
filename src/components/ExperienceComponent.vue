@@ -135,7 +135,7 @@ import { ref } from 'vue'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { resize, cursor } from './functions'
-import { loadData } from './Products/LoadData.ts'
+import { loadData } from './Products/LoadData'
 import SizeControl from './Controls/SizeControl.vue'
 import ColorControl from './Controls/ColorControl.vue'
 import { element, instance } from 'three/examples/jsm/nodes/Nodes.js';
@@ -250,7 +250,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
       //Update product customization
       productMesh.forEach(element => {
         element.scale.set(initialDepth.value, initialHeight.value, initialWidth.value) // TODO: De stabilit un pattern la mesh-urile produselor pentru a nu schimba parametrii astia mai tarziu
-        element.children.forEach(child => {
+        element.children.forEach((child: THREE.Object3D) => {
           if(child instanceof THREE.Mesh && child.name === "DoorBase") {
             child.material.color = new THREE.Color( hex.value );
             child.castShadow = true;

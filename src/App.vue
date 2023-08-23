@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ConfigExample from './components/ConfigExample.vue'
 import ExperienceComponent from './components/ExperienceComponent.vue';
 </script>
 

@@ -33,7 +33,7 @@
 const props = withDefaults(
   defineProps<{
     color_value: string,
-    options: []
+    options: { value: string; label: string }[];
   }>(),
   {
     color_value: ''
