@@ -8,7 +8,7 @@
             :label="props.title" 
             stack-label 
             :dense="dense" />
-        <q-slider v-model="size" :min="0" :max="50" color="green"/>
+        <q-slider v-model="size" :min="0" :max="0.1" :step="0.001" color="green"/>
     </div>
 </template>
 <script setup lang="ts">

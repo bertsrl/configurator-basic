@@ -81,7 +81,6 @@ function init() {
   cameraTarget = new THREE.Vector3(0, 150, 0)
 
   // SCENE
-
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0x000000)
   scene.fog = new THREE.Fog(0x000000, 250, 1400)

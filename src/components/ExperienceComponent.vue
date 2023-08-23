@@ -48,6 +48,12 @@
 
 
 @media only screen and (min-width: 992px) {
+  html,
+  body
+  {
+      overflow: hidden;
+  }
+
   .container {
     display: grid;
     grid-template-columns: 1fr;
@@ -91,7 +97,9 @@
   <div class="container">
     <div class="navigation"  style="background-color: $primary; border-bottom: 1px solid #000;">
       <div class="q-bar--dense" style="background-color: rgba(0, 0, 0, .06); height: 2.5vh;"></div>
-      <div style="height: 4.5vh;"></div>
+      <div style="height: 7.5vh;">
+        <img src="/360config_logo.png" style="position: relative; max-height: 75%; margin: 10px"/>
+      </div>
     </div>
     <div id="content">
       <div id="parent-canvas">
@@ -127,9 +135,10 @@ import { ref } from 'vue'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { resize, cursor } from './functions'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { loadData } from './Products/LoadData.ts'
 import SizeControl from './Controls/SizeControl.vue'
 import ColorControl from './Controls/ColorControl.vue'
+import { element, instance } from 'three/examples/jsm/nodes/Nodes.js';
 
 const hex = ref('green');
 const colorOptions = ref([
@@ -139,25 +148,32 @@ const colorOptions = ref([
   { label: 'Yellow', value: 'yellow' }
 ])
 
-const initialWidth = ref(20);
-const initialHeight = ref(5);
-const initialDepth = ref(45);
+const initialWidth = ref(0.01);
+const initialHeight = ref(0.005);
+const initialDepth = ref(0.01);
+
 /**
  * Base
  */
 THREE.ColorManagement.enabled = false
 
 // // Debug
-// const gui = new dat.GUI()
+const gui = new dat.GUI()
 
-onMounted(() => {
+onMounted(async () => {
+  const productMesh = await loadData('./models/door/correct_door11.gltf')
+
+  console.log(productMesh)
+
   // Canvas
   const canvas = document.getElementById('canvas')!
   console.log(canvas)
-  
+
   // Scene
   const scene = new THREE.Scene()
-
+  scene.background = new THREE.Color(0xdedede)
+  scene.fog = new THREE.Fog(0xdedede, 1, 5)
+  
   // Renderer
   const renderer = new THREE.WebGLRenderer({
       canvas: canvas
@@ -172,77 +188,77 @@ onMounted(() => {
   }
 
   // Camera
-  const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+  const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
   // const aspectRatio = sizes.width / sizes.height
   // const camera = new THREE.OrthographicCamera(- 1 * aspectRatio, 1 * aspectRatio, 1, - 1, 0.1, 100)
 
-  camera.position.z = 3 
+  camera.position.set(-1, 1, -1)
   scene.add(camera)
 
-    //Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
-    scene.add(ambientLight)
+  //Lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+
+  scene.add(ambientLight)
 
   resize(renderer, camera, sizes, parentElement)
   cursor(sizes)
 
-  // Plane
-  const plane = new THREE.Mesh(
-      new THREE.BoxGeometry(10, 0.5, 10),
-      new THREE.MeshBasicMaterial({ color: 0xffffff })
-  )
-
-  plane.material.transparent = true;
-  plane.material.opacity = 0.5
-  plane.position.y = -1
-  scene.add(plane)
+  //Product
+  scene.add(...productMesh)
   
-const gltfLoader = new GLTFLoader()
+  
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
-gltfLoader.load(
-  './models/window_gltf/window_good3.gltf',
-  (gltf) =>
-  {
-      gltf.scene.scale.set(0.025, 0.025, 0.025);
-      gltf.scene.children.forEach((child) => {
-      if (child instanceof THREE.Mesh) {
-        // Access the 'material' property for Mesh objects
-        // child.material = new THREE.MeshBasicMaterial({ color: 0xffffff })
-        // const folder = gui.addFolder( child.name );
-        // folder.addColor(child.material, 'color');
-      
-      }
-      else if (child instanceof THREE.Object3D) {
-        if(child.children[1] instanceof THREE.Mesh && child.children.length > 0) {
-          // const folder = gui.addFolder( child.name );
-          // folder.addColor(child.children[1].material, 'color');
-        }
-      }
-});
-      scene.add(...gltf.scene.children)
-  }
-) 
+ //Create a PointLight and turn on shadows for the light
+  const light = new THREE.DirectionalLight( 0xffffff, 1 );
+  light.position.set( 0, 1, -0.5 );
+  light.castShadow = true; // default false
+  scene.add( light );
 
-const outerEnvironmentMap = new THREE.CubeTextureLoader().load([
-  '/models/environment_map/posx.jpg',  
-  '/models/environment_map/negx.jpg',
-  '/models/environment_map/posy.jpg',
-  '/models/environment_map/negy.jpg',
-  '/models/environment_map/posz.jpg',
-  '/models/environment_map/negz.jpg'
-])
+  //Set up shadow properties for the light
+  light.shadow.mapSize.width = 512; // default
+  light.shadow.mapSize.height = 512; // default
+  light.shadow.camera.near = 0.5; // default
+  light.shadow.camera.far = 500; // default
 
-outerEnvironmentMap.encoding = THREE.sRGBEncoding
+  // //Create a sphere that cast shadows (but does not receive them)
+  // const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 32 );
+  // const sphereMaterial = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
+  // const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+  // sphere.position.y = 0.05
+  // sphere.castShadow = true; //default is false
+  // sphere.receiveShadow = false; //default
+  // scene.add( sphere );
 
-scene.background = outerEnvironmentMap
-scene.environment = outerEnvironmentMap
-
+  //Create a plane that receives shadows (but does not cast them)
+  const planeGeometry = new THREE.PlaneGeometry( 20, 20, 32, 32 );
+  const planeMaterial = new THREE.MeshStandardMaterial( { color: 0xdedede } )
+  const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+    plane.position.y = 0
+    plane.rotation.x = - Math.PI / 2;
+  plane.receiveShadow = true;
+  scene.add( plane );
+  
   // Controls
   const controls = new OrbitControls(camera, canvas)
   controls.enableDamping = true
+  controls.maxPolarAngle = 1.45
 
-  const tick = () =>
+  function tick()
   {
+      //Update product customization
+      productMesh.forEach(element => {
+        element.scale.set(initialDepth.value, initialHeight.value, initialWidth.value) // TODO: De stabilit un pattern la mesh-urile produselor pentru a nu schimba parametrii astia mai tarziu
+        element.children.forEach(child => {
+          if(child instanceof THREE.Mesh && child.name === "DoorBase") {
+            child.material.color = new THREE.Color( hex.value );
+            child.castShadow = true;
+          }
+        });
+      });
+
+      plane.receiveShadow = true;
       // Update controls
       controls.update()
 
@@ -251,6 +267,7 @@ scene.environment = outerEnvironmentMap
 
       // Call tick again on the next frame
       window.requestAnimationFrame(tick)
+
   }
 
   tick()
