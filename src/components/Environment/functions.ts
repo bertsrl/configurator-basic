@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 export function resize(renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveCamera, sizes: { width: number, height: number }, parentElement: HTMLElement) {
-
+    
     const updateRendererSize = () => {
         const rect = parentElement.getBoundingClientRect();
         
@@ -23,6 +23,7 @@ export function resize(renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveC
 
     // Update on window resize
     window.addEventListener('resize', updateRendererSize);
+    
 }
 
 export function cursor(sizes: {width: number, height: number}) {

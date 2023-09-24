@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import ExperienceComponent from './components/ExperienceComponent.vue';
+import Experience from './Views/Experience.vue';
 </script>
 
 <template>
   <div>
-    <ExperienceComponent />
+    <Experience />
   </div>
-  <div id="license" style="color: #fff; font-size: 3vw;">
+    <div id="license" style="color: #fff; font-size: 3vw;">
     By Bertalan Andrei-Eduard
   </div>
 </template>
