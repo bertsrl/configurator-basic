@@ -6,8 +6,8 @@
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
-    "navigation"
-    "content" ;
+    'navigation'
+    'content';
   height: 100vh;
   color: #000;
   width: 100vw;
@@ -17,9 +17,9 @@
   grid-area: content;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-areas: 
-  "canvas" 
-  "settings";
+  grid-template-areas:
+    'canvas'
+    'settings';
   width: 100%;
 }
 
@@ -46,12 +46,10 @@
   background-color: $primary;
 }
 
-
 @media only screen and (min-width: 992px) {
   html,
-  body
-  {
-      overflow: hidden;
+  body {
+    overflow: hidden;
   }
 
   .container {
@@ -59,8 +57,8 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:
-      "navigation"
-      "content";
+      'navigation'
+      'content';
     height: 100vh;
     color: #000;
     width: 100vw;
@@ -75,7 +73,7 @@
     grid-area: content;
     display: grid;
     grid-template-columns: 70% 30%;
-    grid-template-areas: "canvas settings";
+    grid-template-areas: 'canvas settings';
     width: 100%;
   }
 
@@ -95,57 +93,132 @@
 
 <template>
   <div class="container">
-    <div class="navigation"  style="background-color: $primary; border-bottom: 1px solid #000;">
-      <div class="q-bar--dense" style="background-color: rgba(0, 0, 0, .06); height: 2.5vh;"></div>
-      <div style="height: 7.5vh;">
-        <img src="/360config_logo.png" style="position: relative; max-height: 75%; margin: 10px"/>
+    <div
+      class="navigation"
+      style="
+        background-color: $primary;
+        border-bottom: 1px solid #000;
+        display: inline-flex;
+        padding: 1vh 0 !important;
+      "
+    >
+      <div class="q-bar--dense" style="background-color: rgba(0, 0, 0, 0.06); height: 2.5vh"></div>
+      <div style="height: 7.5vh">
+        <img src="/360config_logo.png" style="position: relative; max-height: 75%; margin: 10px" />
       </div>
+      <q-btn-group rounded>
+        <q-btn
+          color="green-6"
+          rounded
+          glossy
+          :icon-right="toggleBoundingBoxes === true ? 'visibility' : 'visibility_off'"
+          label="Bounding Boxes"
+          @click="
+            () => {
+              f.toggleHelpersFn(boundingBoxesRef, toggleBoundingBoxes)
+              toggleBoundingBoxes = toggleBoundingBoxes === true ? false : true
+            }
+          "
+        />
+        <q-btn
+          color="green-8"
+          rounded
+          glossy
+          :icon-right="toggleVertexTags === true ? 'visibility' : 'visibility_off'"
+          label="Vertex Tags"
+          @click="
+            () => {
+              f.toggleHelpersFn(vertexTagsRef, toggleVertexTags)
+              toggleVertexTags = toggleVertexTags === true ? false : true
+            }
+          "
+        />
+        <q-btn
+          color="green-10"
+          rounded
+          glossy
+          :icon-right="toggleFill === true ? 'visibility' : 'visibility_off'"
+          label="Fill"
+          @click="
+            () => {
+              f.toggleHelpersFn(fillMeshesRef, toggleFill)
+              toggleFill = toggleFill === true ? false : true
+            }
+          "
+        />
+      </q-btn-group>
     </div>
     <div id="content">
       <div id="parent-canvas">
+        <tools-control />
+        <div
+          style="
+            position: absolute;
+            bottom: 0;
+            right: 32vw;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+          "
+        >
+          <div></div>
+          <div></div>
+
+          <!-- Other buttons -->
+          <appendix-add
+            v-for="(appendix, index) in appendixButtons"
+            :key="index"
+            :name="appendix.appendix.name"
+            icon="arrow_up"
+            style="grid-column: auto"
+          />
+        </div>
         <canvas id="canvas"></canvas>
-        <VertexTag :scene="scene" /> 
       </div>
-      <div class="settings" style="background-color: $secondary;">
-        <div class="settings-container q-pa-md" >
-           <h6>Customize Product</h6>
+      <div class="settings" style="background-color: $secondary">
+        <div class="settings-container q-pa-md">
+          <h6>Customize Product</h6>
         </div>
         <div class="color-controls q-pa-md">
-            <h6>Color Controls</h6>
-            <!-- Create a color picker component -->
-            <color-control :options="colorOptions" v-model:color_value="hex" />
-            <p style="margin-top: 2vh;">Selected color: {{ hex }}</p>
-          </div>
-          <div class="size-controls q-pa-md" >
-            <h6>Size Controls</h6>
-            <size-control title="Width" v-model:size="changeWidth"/>
-            <size-control title="Height" v-model:size="changeHeight"/>
-            <size-control title="Depth" v-model:size="initialDepth"/>
-          </div>
+          <h6>Color Controls</h6>
+          <!-- Create a color picker component -->
+          <color-control :options="colorOptions" v-model:color_value="hex" />
+          <p style="margin-top: 2vh">Selected color: {{ hex }}</p>
+        </div>
+        <div class="size-controls q-pa-md">
+          <h6>Size Controls</h6>
+          <size-control title="Width" v-model:size="changeWidth" />
+          <size-control title="Height" v-model:size="changeHeight" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted } from 'vue'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
 
 import { ref, toRaw, watch, watchEffect } from 'vue'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { resize, cursor } from '../components/Environment/functions'
-import provideVertexTag from '../components/Environment/vertexTag'
-import { loadData } from '../components/Environment/Products/LoadData'
-import SizeControl from '../components/Controls/SizeControl.vue'
-import ColorControl from '../components/Controls/ColorControl.vue' 
+import * as f from '@/components/Environment/functions'
+import * as vTag from '@/components/Environment/vertexTag'
+import { loadData } from '@/components/Environment/Products/LoadData'
+import SizeControl from '@/components/Controls/SizeControl.vue'
+import ColorControl from '@/components/Controls/ColorControl.vue'
+import { points } from '@/components/Environment/points'
+import ToolsControl from '@/components/Controls/ToolsControl.vue'
+import { appendixButtons } from '@/components/Environment/Settings/appendixFrame'
+import AppendixAdd from '@/components/Controls/AppendixAdd.vue'
+import * as settings from '@/components/Environment/Settings/index'
 
 import TWEEN from '@tweenjs/tween.js'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { biBoundingBox } from '@quasar/extras/bootstrap-icons';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
+import { biBoundingBox } from '@quasar/extras/bootstrap-icons'
+import { write } from 'fs'
 
-const hex = ref('green');
+const hex = ref('green')
 const colorOptions = ref([
   { label: 'Red', value: 'red' },
   { label: 'Green', value: 'green' },
@@ -153,444 +226,269 @@ const colorOptions = ref([
   { label: 'Yellow', value: 'yellow' }
 ])
 
-const changeWidth = ref(0);
-const changeHeight = ref(0);
+const changeWidth = ref(0)
+const changeHeight = ref(0)
 
-const initialWidth = ref(0);
-const initialHeight = ref(0);
-const initialDepth = ref(0);
+const toggleBoundingBoxes = ref(true)
+const toggleVertexTags = ref(true)
+const toggleFill = ref(true)
 
-const initialCorner1Position = ref({x:0, y:0, z:0});
-const initialCorner2Position = ref({x:0, y:0, z:0});
-const initialCorner3Position = ref({x:0, y:0, z:0});
-const initialCorner4Position = ref({x:0, y:0, z:0});
+const boundingBoxesRef = ref()
+const fillMeshesRef = ref()
+const vertexTagsRef = ref()
+const intersectMeshesRef = ref()
+const cornersRef = ref()
+
+// Create a ref for the points array
+const pointsRef = ref([])
+// Create a ref for the Three.js line
+const lineRef = ref()
 
 /**
  * Base
  */
 THREE.ColorManagement.enabled = false
-THREE.Cache.enabled = true;
+THREE.Cache.enabled = true
 
 // Debug
 const gui = new dat.GUI()
 
 onMounted(async () => {
-  const productMesh = await loadData('./models/new_tests/pivot_point.gltf')
-  productMesh[5].position.y += 1.5;
-  productMesh[5].position.z -= 1.5;
-  productMesh[5].position.x += 5;
-  productMesh[5].rotation.y = Math.PI / 2;
+  // Create an axis helper
+  const axisHelper = new THREE.AxesHelper(0.4)
 
-  console.log(productMesh)
+  f.addToScene(axisHelper)
+
+  const product = await loadData('./models/new_tests/corner_profile3.gltf')
+
+  const productMesh = product.filter((a) => a && a.name)
+
+  for (const mesh of productMesh) {
+    if (mesh instanceof THREE.Object3D) mesh.position.z = -4
+    mesh.scale.set(0.4, 0.4, 0.4)
+    mesh.rotation.y = Math.PI / 2
+
+    // mesh.rotation.y = -Math.PI
+    f.addToScene(mesh)
+  }
+
+  console.log('product: ', product)
+  console.log('productMesh: ', productMesh)
 
   // Canvas
   const canvas = document.getElementById('canvas')!
   console.log(canvas)
 
   // Scene
-  const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0xdedede)
-  // scene.fog = new THREE.Fog(0xdedede, 1, 5)
-  
+  f.scene.background = new THREE.Color(0xdedede)
+  // f.scene.fog = new THREE.Fog(0xdedede, 1, 5)
+
   // Renderer
   const renderer = new THREE.WebGLRenderer({
-      canvas: canvas
+    canvas: canvas
   })
 
-  const parentElement = document.getElementById('parent-canvas')!; // Replace with the actual ID or reference to the parent element
-
-  // Sizes
-  const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
-  }
+  const parentElement = document.getElementById('parent-canvas')! // Replace with the actual ID or reference to the parent element
 
   // Camera
-  const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
+  const camera = new THREE.PerspectiveCamera(20, f.sizes.width / f.sizes.height, 0.01, 100)
   // const aspectRatio = sizes.width / sizes.height
   // const camera = new THREE.OrthographicCamera(- 1 * aspectRatio, 1 * aspectRatio, 1, - 1, 0.1, 100)
 
-  camera.position.set(-1, 1, -1)
-  scene.add(camera)
+  camera.position.set(0, 0, 5)
+  f.addToScene(camera)
 
-  //Lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+  f.resize(renderer, camera, f.sizes, parentElement)
+  f.cursor(f.sizes, camera)
 
-  scene.add(ambientLight)
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap // default THREE.PCFShadowMap
 
-  resize(renderer, camera, sizes, parentElement)
-  cursor(sizes)
-  
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+  f.addToScene(settings.ambientLight)
+  f.addToScene(settings.light)
 
- //Create a PointLight and turn on shadows for the light
-  const light = new THREE.DirectionalLight( 0xffffff, 1 );
-  light.position.set( 0, 1, -0.5 );
-  light.castShadow = true; // default false
-  scene.add( light );
+  f.addToScene(settings.plane)
 
-  //Set up shadow properties for the light
-  light.shadow.mapSize.width = 512; // default
-  light.shadow.mapSize.height = 512; // default
-  light.shadow.camera.near = 0.5; // default
-  light.shadow.camera.far = 500; // default
-
-  // //Create a sphere that cast shadows (but does not receive them)
-  // const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 32 );
-  // const sphereMaterial = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
-  // const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-  // sphere.position.y = 0.05
-  // sphere.castShadow = true; //default is false
-  // sphere.receiveShadow = false; //default
-  // scene.add( sphere );
-
-  //Create a plane that receives shadows (but does not cast them)
-  const planeGeometry = new THREE.PlaneGeometry( 20, 20, 32, 32 );
-  const planeMaterial = new THREE.MeshStandardMaterial( { color: 0x000000 } )
-  const plane = new THREE.Mesh( planeGeometry, planeMaterial );
-  plane.position.y = -1.2
-  plane.rotation.x = - Math.PI / 2;
-    
-  plane.receiveShadow = true;
-  scene.add( plane );
-  
   // Controls
   const controls = new OrbitControls(camera, canvas)
   controls.enableDamping = true
-  controls.maxPolarAngle = 1.45
+  controls.maxPolarAngle = Math.PI / 2
 
-  scene.add(...productMesh)
+  // Set the minimum and maximum azimuthal angles
+  controls.minAzimuthAngle = -Math.PI / 2 // Minimum azimuthal angle (in radians)
+  controls.maxAzimuthAngle = Math.PI / 2 // Maximum azimuthal angle (in radians)
 
-  // scene.add( new THREE.BoxHelper( productMesh[7] ) );
+  vertexTagsRef.value = vTag.vertexTags
 
+  const { boundingBoxes, fillMeshes, intersectMeshes, corners } = f.computeBoundingBoxes(
+    productMesh[0].children[2],
+    productMesh[0].children[0]
+  )
 
-  // productMesh[7].children[0].material.wireframe = true;
+  boundingBoxesRef.value = toRaw(boundingBoxes)
+  fillMeshesRef.value = toRaw(fillMeshes)
+  intersectMeshesRef.value = toRaw(intersectMeshes)
+  cornersRef.value = toRaw(corners)
 
-  // productMesh[7].children[1].material.wireframe = true;
+  //TODO: transform this into one fn
 
-  // Define the four corners of the rectangular shape
+  corners[0].rotation.y = Math.PI / 2
+  corners[0].rotation.x = Math.PI
 
+  corners[1].rotation.y = -Math.PI / 2
+  corners[1].rotation.x = Math.PI
 
- /**
-  * @abstract adding the helping lines of the skeleton build and vertices tags indexed
-  */
- 
-  const points = [
-    new THREE.Vector3(-1, 1, 1),
-    new THREE.Vector3(1, 1, 1),
-    new THREE.Vector3(1, -1, 1),
-    new THREE.Vector3(-1, -1, 1),
-    new THREE.Vector3(-1, 1, 1), // Close the rectangle by connecting back to the starting point
-    new THREE.Vector3(-2, 1, 1),
-    new THREE.Vector3(-3, 4, 2),
-    new THREE.Vector3(-6, 2, 5),
-    new THREE.Vector3(3, 3, 3),
-    new THREE.Vector3(0, 5, 8)
-  ];
+  corners[2].rotation.y = -Math.PI / 2
 
-  const vertexTags: THREE.Group[] = []
-  for(const [index=1, point] of points.slice(1).entries()) {
-    const vertexTag = provideVertexTag(index)
-    vertexTag.position.copy(point)
-    vertexTag.scale.set(0.5, 0.5, 0.5)
-    
-    vertexTags.push(vertexTag);
-    scene.add(vertexTag)
+  corners[3].rotation.y = Math.PI / 2
+
+  for (const corner of corners) {
+    if (corner instanceof THREE.Object3D) {
+      const box3 = new THREE.Box3().setFromObject(corner)
+
+      const dimension = new THREE.Vector3()
+      box3.getSize(dimension)
+
+      const boundingIntesect = new THREE.Mesh(
+        new THREE.BoxGeometry(dimension.x, dimension.y, dimension.z),
+        new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
+      )
+
+      corner.getWorldPosition(boundingIntesect.position)
+
+      boundingBoxes.push(boundingIntesect)
+    }
   }
 
-    // Create a geometry with the points
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  f.addToScene(fillMeshes)
+  f.addToScene(vTag.vertexTags)
+  f.addToScene(intersectMeshes)
+  f.addToScene(boundingBoxes)
+  f.addToScene(corners)
 
-  // Create the line segments
-  const line = new THREE.Line(geometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+  console.log(appendixButtons)
 
-  scene.add(line)
+  for (const appendix of appendixButtons) {
+    f.addToScene(appendix.appendix)
+    // Calculate the average position of points at index 1 and index 2
+    const avgPosition = new THREE.Vector3()
+      .addVectors(appendix.point1, appendix.point2)
+      .multiplyScalar(0.5)
 
+    if (appendix.appendix instanceof THREE.Object3D) {
+      // Check if points have the same Y value
+      if (appendix.point1.y > 0 && appendix.point1.y === appendix.point2.y) {
+        // Adjust the position based on Y value
+        avgPosition.y += 0.5
+      } else if (appendix.point1.y < 0 && appendix.point1.y === appendix.point2.y)
+        avgPosition.y -= 0.5
 
-   /**
-  * @abstract Create bounding boxes for each line segment
-  */
-  const boundingBoxes = [];
+      // Check if points have the same X value
+      if (appendix.point1.x > 0 && appendix.point1.x === appendix.point2.x) {
+        // Adjust the position based on Y value
+        avgPosition.x += 0.5
+      } else if (appendix.point1.x < 0 && appendix.point1.x === appendix.point2.x)
+        avgPosition.x -= 0.5
 
-  for (let i = 0; i < points.length - 1; i++) {
-    // Define the endpoints of the line segment
-    const start = points[i];
-    const end = points[i + 1];
+      appendix.appendix.position.copy(avgPosition)
 
-    // Calculate the length and direction of the line segment
-  const lineLength = start.distanceTo(end);
+      // const box3 = new THREE.Box3().setFromObject(appendix.appendix)
 
-  // Create a box geometry for the bounding box
-  const boxGeometry = new THREE.BoxGeometry(0.2, 0.2, lineLength);
+      // const helper = new THREE.Box3Helper(box3)
 
-  // Create a mesh for the bounding box
-  const boundingBoxMesh = new THREE.Mesh(boxGeometry, new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true }));
-
-  // Position the bounding box at the center of the line segment
-  const midpoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5); // MEDIA ARITMETICA DINTRE NUMERE
-  boundingBoxMesh.position.copy(midpoint);
-
-  // Create a texture and set its repeat values
-  const texture = new THREE.TextureLoader().load('./textures/Wood_023_roughness.jpg');
-  texture.wrapS = THREE.RepeatWrapping; // Repeat horizontally
-  texture.wrapT = THREE.RepeatWrapping; // Repeat vertically
-  texture.repeat.set(10, 10); // Number of times to repeat in each direction (adjust as needed)
-
-  /**
-   * @constant fill-up the bounding boxes
-   */
-
-  const fill = productMesh[5].clone()
-  fill.position.copy(start)
-  fill.scale.set(0.1, 0.1, lineLength/2)
-  fill.lookAt(end) 
-  fill.material.map = texture;
-  fill.material.transparent = true;
-  fill.material.opacity = 0.1;
-
-  scene.add(fill)
-  // Rotate the bounding box to align with the line's direction
-  boundingBoxMesh.lookAt(end);
-
-  boundingBoxes.push(boundingBoxMesh);
-
-  // Add the bounding box mesh to your scene
-  scene.add(boundingBoxMesh);
+      // f.addToScene(helper)
+    }
   }
 
-// // Loop through all the meshes in the GLTF model and set them to wireframe mode
-// productMesh[7].traverse((child: THREE.Object3D) => {
-//   if (child instanceof THREE.Mesh) {
-//     setMeshToWireframe(child);
-//   }
-// });
-  // const profil_w = toRaw(productMesh[5])
-  // const corner_a = toRaw(productMesh[6])
-  // const corner_b = toRaw(productMesh[7])
-  // const glass = toRaw(productMesh[9])
-  
-  // scene.add(profil_h, profil_w, corner_a, corner_b, glass)
+  function tick() {
+    for (const tag of vertexTagsRef.value) {
+      tag.lookAt(camera.position)
+    }
 
-  // profil_h.material.color = new THREE.Color("Red");
-  // profil_w.material.color = new THREE.Color("Green");
-  // corner_a.material.color = new THREE.Color("Blue");
-  // corner_b.material.color = new THREE.Color("Yellow");
-  // glass.material.color = new THREE.Color("Pink")
-  // // productMesh[7].children[0].material.morphTarget = true
-  // console.log(toRaw(productMesh[7]))
+    //Update controls
+    controls.update()
 
-  // const material = new THREE.LineBasicMaterial({
-	//   color: 0x0000ff
-  // });
+    // Render
+    renderer.render(f.scene, camera)
 
-  // const points = [];
-  // points.push( new THREE.Vector3( - 10, 0, 0 ) );
-  // points.push( new THREE.Vector3( 0, 10, 0 ) );
-  // points.push( new THREE.Vector3( 10, 0, 0 ) );
-
-  // const geometry = new THREE.BufferGeometry().setFromPoints( points );
-
-  // const line = new THREE.Line( geometry, material );
-  // scene.add( line );
-
-  // const lineStart = new THREE.Vector3( - 10, 0, 0 ); // Starting point
-  // const lineEnd = new THREE.Vector3(0, 10, 0); // Ending point
-  // const lineDirection = new THREE.Vector3().copy(lineEnd).sub(lineStart).normalize(); // Get line direction
-  // const numberOfInstances = 10; // Number of instances you want to create
-
-  // console.log(lineDirection)
-  // const positions = [];
-  // for (let i = 0; i < numberOfInstances; i++) {
-  //   const t = i / (numberOfInstances - 1); // Parameterized value from 0 to 1
-  //   const position = new THREE.Vector3().lerpVectors(lineStart, lineEnd, t);
-  //   positions.push(position);
-  // }
-  // const materials = [
-  //   new THREE.MeshBasicMaterial({ color: 0xff0000 }),   // Red material
-  //   new THREE.MeshBasicMaterial({ color: 0x00ff00 }),   // Green material
-  //   new THREE.MeshBasicMaterial({ color: 0x0000ff }),   // Blue material
-  //   // Add more materials as needed
-  // ];
-
-  // for (const position of positions) {
-  //   const instance = profil_h.clone(); // Clone your mesh
-  //   instance.position.copy(position); // Set the position
-
-  //   // Calculate the rotation quaternion to align with the line direction
-  //   // instance.lookAt(lineDirection.z, lineDirection.z, lineDirection.z);
-  //   const randomMaterial = materials[Math.floor(Math.random() * materials.length)];
-  //   instance.rotation.y = -Math.PI / 4
-  //   instance.material = randomMaterial;
-  //   scene.add(instance); // Add the instance to the scene
-  // }
-  // const leftRightSide = toRaw(productMesh[5].children[0])
-  // const topBottomSide = toRaw(productMesh[5].children[1])
-  // const glass = toRaw(productMesh[5].children[2])
-  
-  // const corner0 = toRaw(productMesh[6].children[0])
-  // const corner1 = toRaw(productMesh[6].children[1])
-  // const corner2 = toRaw(productMesh[6].children[2])
-  // const corner3 = toRaw(productMesh[6].children[3])
-
-
-  // console.log("ceva:", toRaw(topBottomSide.value))
-  // console.log("corner1: ", corner1)
-
-  // const corners = productMesh[6].children.map((corner: THREE.Object3D) => toRaw(corner))
-  // corners[0].material.color = new THREE.Color("Red")
-  // corners[1].material.color = new THREE.Color("Green")
-  // corners[2].material.color = new THREE.Color("Blue")
-  // corners[3].material.color = new THREE.Color("Yellow")
-
-
-  // initialCorner1Position.value.z = corners[0].position.z
-  // initialCorner2Position.value.z = corners[1].position.z
-  // initialCorner3Position.value.z = corners[2].position.z
-  // initialCorner4Position.value.z = corners[3].position.z
-
-  // const movingGroup = new THREE.Group();
-  // const initialTopBottomSize = topBottomSide.scale.z;
-
-  // console.log("rawCorners: ", corners)
-  // const topBottomGroup = new THREE.Group()
-  // topBottomGroup.add(topBottomSide, corners[0], corners[1], corners[2], corners[3])
-  
-  // const leftRightGroup = new THREE.Group()
-  // leftRightGroup.add(leftRightSide, corners[0], corners[1], corners[2], corners[3])
-
-  // console.log("Grupul: ", topBottomGroup)
-  // const initialGroupSize = topBottomGroup.scale.z;
-
-  // scene.add(leftRightSide, topBottomSide, glass, ...corners, movingGroup)
-
-  productMesh.forEach(element => {
-    // console.log(element)
-    // topBottomSide.value = element.children[1];
-
-      // //   element.children.forEach((child: THREE.Object3D) => {
-      // //     if(child instanceof THREE.Mesh) {
-      // //       topBottomSide.value = child;
-      // //       Product
-      // //       topBottomSide.value.position.set(0,0,0);
-      // //       topBottomSide.value.position.set(1,1,1);
-      // //     }
-
-      // //   if(child instanceof THREE.Mesh) {
-      // //     const vnh = new VertexNormalsHelper( child, 1 );
-			// // 		scene.add( vnh );
-
-          
-      // //     const testControls = {
-      // //       zPosition: child.position.z,
-      // //     };
-      // //     // Add the control to the GUI
-      // //     // gui.add(testControls, 'zPosition', -initialWidth.value, initialWidth.value).onChange((value) => {
-      // //     //   // Update the z-position of the child object when the GUI slider is changed
-      // //     //   child.position.z = value;
-      // //     // });
-
-
-      // //       if(child.name === "Frame_Top_Bottom") {
-      // //         topBottomSide.value = child
-      // //         topBottomSide.value.scale.set(.5,.5,.5);
-      // //         // child.material.color = new THREE.Color( hex.value );
-      // //         // child.castShadow = true;
-      // //         // topBottomGroup.add(child)
-      // //       }
-            
-      // //       if(child.name === "Frame_Left_Right") {
-      // //         initialHeight.value = child.scale.y;
-      // //         // child.material.color = new THREE.Color( hex.value );
-      // //         // child.castShadow = true;
-      // //       }
-
-      // //       if(child.name === "Glass") {
-      // //         initialHeight.value = child.scale.y;
-      // //         initialWidth.value = child.scale.z;
-      // //       }
-
-      // //       if(child.name === "Corner1") {
-      // //         child.material.color = new THREE.Color( "Red" );
-      // //         // child.position.z += 0.1
-      // //         initialCorner1Position.value = child.position
-      // //         // child.position.z += 0.1
-      // //       }
-      // //       else if(child.name === "Corner2") {
-      // //         child.material.color = new THREE.Color( "Green" );
-      // //         // child.position.z += 0.1
-      // //         initialCorner2Position.value = child.position
-      // //       }
-      // //       else if(child.name === "Corner3") {
-      // //         child.material.color = new THREE.Color( "Blue" );
-      // //         // child.position.z -= 0.1
-      // //         initialCorner3Position.value = child.position
-      // //       }
-      // //       else if(child.name === "Corner4") {
-      // //         child.material.color = new THREE.Color( "Yellow" );
-      // //         // child.position.z -= 0.1
-      // //         initialCorner4Position.value = child.position
-      // //       }
-      // //   }
-        
-      // // });
-    });
-
-  function tick()
-  {
-      for(const tag of vertexTags) {
-       tag.lookAt(camera.position)
-      }
-  //     topBottomGroup.scale.z = (initialGroupSize+changeWidth.value)
-      // corner1.position.set(initialCorner1Position)
-      //Update product customization
-      // productMesh.forEach(element => {
-      //   // element.scale.set(initialDepth.value, initialHeight.value*100, initialWidth.value*100)
-      //   element.children.forEach((child: THREE.Object3D) => {
-      //     if(child instanceof THREE.Mesh) {
-      //       if(child.name === "Frame_Top_Bottom") {
-      //         // child.scale.z = (initialWidth.value + changeWidth.value);
-      //         // child.material.color = new THREE.Color( hex.value );
-      //         // child.castShadow = true;
-      //       }
-      //       if(child.name === "Frame_Left_Right") {
-      //         // child.scale.y = (initialHeight.value + changeHeight.value);
-      //         // child.material.color = new THREE.Color( hex.value );
-      //         // child.castShadow = true;
-      //       }
-      //       if(child.name === "Glass") {
-      //         // child.scale.y = (initialHeight.value + changeHeight.value);
-      //         // child.scale.z = (initialWidth.value + changeWidth.value);
-      //       }
-      //     }
-      //   });
-      // });
-
-      plane.receiveShadow = true;
-      // Update controls
-      controls.update()
-
-       // Update the Tween manager
-      TWEEN.update();
-
-      // Render
-      renderer.render(scene, camera)
-
-      window.requestAnimationFrame(tick)
-
+    window.requestAnimationFrame(tick)
   }
-
   tick()
+  // Add an event listener to the renderer's domElement
+  // renderer.domElement.addEventListener('mousedown', (event) => {
+  //   let startX, startY
+  //   if (!event.shiftKey) {
+  //     // Prevent camera rotation by disabling controls when SHIFT is held
+  //     controls.enabled = false
 
-  // watchEffect(() => {
-  //   if(changeWidth.value) {
-  //     productMesh[7].children[0].morphTargetInfluences[0] = changeWidth.value 
-  //     productMesh[7].children[1].morphTargetInfluences[0] = changeWidth.value 
-  //   }
-  //   if(changeHeight.value) {
-  //     productMesh[7].children[0].morphTargetInfluences[1] = changeHeight.value 
-  //     productMesh[7].children[1].morphTargetInfluences[1] = changeHeight.value 
+  //     // Track initial mouse position
+  //     startX = event.clientX
+  //     startY = event.clientY
+
+  //     // Function to handle mousemove event
+  //     const onMouseMove = (e) => {
+  //       // Calculate the change in mouse position
+  //       const deltaX = e.clientX - startX
+  //       const deltaY = e.clientY - startY
+
+  //       // Adjust the camera position based on deltaX and deltaY
+  //       camera.position.x -= deltaX * 0.05 // Adjust the factor as needed
+  //       camera.position.y += deltaY * 0.05 // Adjust the factor as needed
+
+  //       // Update the controls target to keep it centered
+  //       controls.target.x -= deltaX * 0.05
+  //       controls.target.y += deltaY * 0.05
+
+  //       // Update the initial mouse position for the next move event
+  //       startX = e.clientX
+  //       startY = e.clientY
+
+  //       // Render the scene
+  //       renderer.render(f.scene, camera)
+  //     }
+
+  //     // Function to handle mouseup event
+  //     const onMouseUp = () => {
+  //       // Remove the mousemove and mouseup listeners
+  //       document.removeEventListener('mousemove', onMouseMove)
+  //       document.removeEventListener('mouseup', onMouseUp)
+
+  //       // Re-enable controls
+  //       controls.enabled = true
+  //     }
+
+  //     // Add mousemove and mouseup listeners
+  //     document.addEventListener('mousemove', onMouseMove)
+  //     document.addEventListener('mouseup', onMouseUp)
   //   }
   // })
-});
+  // watchEffect(() => {
+  //   if(changeWidth.value) {
+  //     productMesh[7].children[0].morphTargetInfluences[0] = changeWidth.value
+  //     productMesh[7].children[1].morphTargetInfluences[0] = changeWidth.value
+  //   }
+  //   if(changeHeight.value) {
+  //     productMesh[7].children[0].morphTargetInfluences[1] = changeHeight.value
+  //     productMesh[7].children[1].morphTargetInfluences[1] = changeHeight.value
+  //   }
+  // })
+  // Function to create the line geometry and add it to the scene
+
+  // Watch for changes in points.length and recreate the line when it changes
+
+  watchEffect(() => {
+    if (points.length) {
+      console.log('RERENDER')
+      // Create a geometry with the points
+      const geometry = new THREE.BufferGeometry().setFromPoints(points)
+
+      // Create the line segments
+      const line = new THREE.Line(geometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }))
+
+      f.scene.add(line)
+
+      // tick()
+    }
+  })
+})
 </script>

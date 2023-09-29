@@ -9,8 +9,9 @@ async function loadData(path: string) {
     const productData = await gltfLoader.loadAsync(path); 
     
     const product = setupModel(productData)
-    console.log(product)
-    return product;
+    const productMesh = product.filter((a) => a && a.name)
+
+    return productMesh;
 }
 
 async function loadFont(path: string) {

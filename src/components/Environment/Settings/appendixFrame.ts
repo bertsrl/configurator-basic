@@ -2,11 +2,12 @@ import * as THREE from "three";
 
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
-import { points } from "./points"
+import { points } from "../points"
 
-THREE.Cache.enabled = true;
+export const appendixButtons: THREE.Group[] = []
 
-function provideVertexTag(index?: number) {
+for (const [index = 1, point] of points.slice(1).entries()) {
+
     const group = new THREE.Group()
     
     const loader = new FontLoader();
@@ -27,7 +28,7 @@ function provideVertexTag(index?: number) {
         group.add(circleMesh)
         
         // Create the text geometry
-        const textGeometry = new TextGeometry('V'+index?.toString(), {
+        const textGeometry = new TextGeometry('+', {
             font: font,
             size: 18,
             height: 5,
@@ -53,17 +54,26 @@ function provideVertexTag(index?: number) {
         group.add(textMesh)
         
     });   
-    
-    return group
-}
 
-export const vertexTags: THREE.Group[] = []
-    for (const [index = 1, point] of points.slice(1).entries()) {
-    const vertexTag = provideVertexTag(index)
-    vertexTag.position.copy(point)
-    vertexTag.scale.set(0.5, 0.5, 0.5)
+    const appendix = group;
 
-    vertexTags.push(vertexTag)
+    switch(index) {
+        case 0:
+            appendix.name = "Add " + "Up"
+            break;
+        case 1:
+            appendix.name = "Add " + "Left"
+            break;
+        case 2:
+            appendix.name = "Add " + "Down"
+            break;
+        case 3:
+            appendix.name = "Add " + "Right"
+            break; 
+    }
+
+    appendix.scale.set(0.5, 0.5, 0.5);
+
+    appendixButtons.push({appendix , point1: points[index] , point2: points[index+1], itsHovered: true});
+    console.log("appendixButtons ", appendixButtons)
 }
-  
-export default provideVertexTag;
