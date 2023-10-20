@@ -28,7 +28,7 @@ const props = withDefaults(
   }
 )
 
-function addFrameAppendix(name: string, renderer: THREE.WebGLRenderer, camera: THREE.Camera) {
+async function addFrameAppendix(name: string, renderer: THREE.WebGLRenderer, camera: THREE.Camera) {
   const { maxTop, maxRight } = points.getMaxPoints(props.name)
   console.log('Initial points array: ', points.points)
 
@@ -36,16 +36,29 @@ function addFrameAppendix(name: string, renderer: THREE.WebGLRenderer, camera: T
     points.points.splice(
       2,
       0,
-      new THREE.Vector3(maxTop.point1.x, maxTop.point1.y + 1, maxTop.point1.z)
+      new THREE.Vector3(maxTop.point2.x, maxTop.point2.y + 1, maxTop.point2.z)
     )
     points.points.splice(
       2,
       0,
-      new THREE.Vector3(maxTop.point2.x, maxTop.point2.y + 1, maxTop.point2.z)
+      new THREE.Vector3(maxTop.point1.x, maxTop.point1.y + 1, maxTop.point1.z)
     )
-
-    console.log('points push: ', points.points)
   }
+  if (props.name === 'Add Right') {
+    points.points.splice(
+      2,
+      0,
+      new THREE.Vector3(maxRight.point1.x + 1, maxRight.point1.y, maxRight.point1.z)
+    )
+    points.points.splice(
+      2,
+      0,
+      new THREE.Vector3(maxRight.point2.x + 1, maxRight.point2.y, maxRight.point2.z)
+    )
+  }
+  console.log('points push: ', points.points)
+
+  f.addPieces()
 }
 </script>
 <style lang=""></style>

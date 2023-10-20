@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 
 export const points = [
-    new THREE.Vector3(-1, 1, 0),
-    new THREE.Vector3(1, 1, 0),
-    new THREE.Vector3(1, -1, 0),
-    new THREE.Vector3(-1, -1, 0),
+    new THREE.Vector3(-1, 1, 0), //V3
+    new THREE.Vector3(1, 1, 0), //V0
+    new THREE.Vector3(1, -1, 0), //V1
+    new THREE.Vector3(-1, -1, 0), //V2
     new THREE.Vector3(-1, 1, 0), // Close the rectangle by connecting back to the starting point
   ];
 

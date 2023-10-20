@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import Experience from './Views/Experience.vue'
+import { useCounterStore } from './store/index'
+import { toRaw } from 'vue'
+
+const stateCounter = useCounterStore()
+
+
 </script>
 
 <template>

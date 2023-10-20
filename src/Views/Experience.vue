@@ -106,47 +106,7 @@
       <div style="height: 7.5vh">
         <img src="/360config_logo.png" style="position: relative; max-height: 75%; margin: 10px" />
       </div>
-      <q-btn-group rounded>
-        <q-btn
-          color="green-6"
-          rounded
-          glossy
-          :icon-right="toggleBoundingBoxes === true ? 'visibility' : 'visibility_off'"
-          label="Bounding Boxes"
-          @click="
-            () => {
-              f.toggleHelpersFn(boundingBoxesRef, toggleBoundingBoxes)
-              toggleBoundingBoxes = toggleBoundingBoxes === true ? false : true
-            }
-          "
-        />
-        <q-btn
-          color="green-8"
-          rounded
-          glossy
-          :icon-right="toggleVertexTags === true ? 'visibility' : 'visibility_off'"
-          label="Vertex Tags"
-          @click="
-            () => {
-              f.toggleHelpersFn(vertexTagsRef, toggleVertexTags)
-              toggleVertexTags = toggleVertexTags === true ? false : true
-            }
-          "
-        />
-        <q-btn
-          color="green-10"
-          rounded
-          glossy
-          :icon-right="toggleFill === true ? 'visibility' : 'visibility_off'"
-          label="Fill"
-          @click="
-            () => {
-              f.toggleHelpersFn(fillMeshesRef, toggleFill)
-              toggleFill = toggleFill === true ? false : true
-            }
-          "
-        />
-      </q-btn-group>
+      <helpers-control />
     </div>
     <div id="content">
       <div id="parent-canvas">
@@ -160,9 +120,6 @@
             grid-template-columns: 1fr 1fr 1fr;
           "
         >
-          <div></div>
-          <div></div>
-
           <!-- Other buttons -->
           <appendix-add
             v-for="(appendix, index) in appendixButtons"
@@ -172,6 +129,7 @@
             style="grid-column: auto"
           />
         </div>
+        <scene-controller />
         <canvas id="canvas"></canvas>
       </div>
       <div class="settings" style="background-color: $secondary">
@@ -209,14 +167,11 @@ import SizeControl from '@/components/Controls/SizeControl.vue'
 import ColorControl from '@/components/Controls/ColorControl.vue'
 import { points } from '@/components/Environment/points'
 import ToolsControl from '@/components/Controls/ToolsControl.vue'
-import { appendixButtons } from '@/components/Environment/Settings/appendixFrame'
+import { appendixButtons } from '@/components/Environment/Settings/appendixButton'
 import AppendixAdd from '@/components/Controls/AppendixAdd.vue'
-import * as settings from '@/components/Environment/Settings/index'
-
-import TWEEN from '@tweenjs/tween.js'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
-import { biBoundingBox } from '@quasar/extras/bootstrap-icons'
-import { write } from 'fs'
+import SceneController from '@/components/Environment/Init/SceneController.vue'
+import HelpersControl from '@/components/Controls/HelpersControl.vue'
+import { computeProduct } from '@/components/Environment/Products/InitializeProduct'
 
 const hex = ref('green')
 const colorOptions = ref([
@@ -229,59 +184,20 @@ const colorOptions = ref([
 const changeWidth = ref(0)
 const changeHeight = ref(0)
 
-const toggleBoundingBoxes = ref(true)
-const toggleVertexTags = ref(true)
-const toggleFill = ref(true)
-
-const boundingBoxesRef = ref()
-const fillMeshesRef = ref()
-const vertexTagsRef = ref()
-const intersectMeshesRef = ref()
-const cornersRef = ref()
-
-// Create a ref for the points array
-const pointsRef = ref([])
-// Create a ref for the Three.js line
-const lineRef = ref()
-
-/**
- * Base
- */
-THREE.ColorManagement.enabled = false
-THREE.Cache.enabled = true
+const myPoints = ref()
+myPoints.value = points
 
 // Debug
 const gui = new dat.GUI()
 
 onMounted(async () => {
-  // Create an axis helper
-  const axisHelper = new THREE.AxesHelper(0.4)
+  // Adding Loaded Mesh full version in the back as a dummy
+  // f.addToScene(await f.addDummy())
 
-  f.addToScene(axisHelper)
-
-  const product = await loadData('./models/new_tests/corner_profile3.gltf')
-
-  const productMesh = product.filter((a) => a && a.name)
-
-  for (const mesh of productMesh) {
-    if (mesh instanceof THREE.Object3D) mesh.position.z = -4
-    mesh.scale.set(0.4, 0.4, 0.4)
-    mesh.rotation.y = Math.PI / 2
-
-    // mesh.rotation.y = -Math.PI
-    f.addToScene(mesh)
-  }
-
-  console.log('product: ', product)
-  console.log('productMesh: ', productMesh)
-
+  
   // Canvas
   const canvas = document.getElementById('canvas')!
   console.log(canvas)
-
-  // Scene
-  f.scene.background = new THREE.Color(0xdedede)
-  // f.scene.fog = new THREE.Fog(0xdedede, 1, 5)
 
   // Renderer
   const renderer = new THREE.WebGLRenderer({
@@ -290,81 +206,20 @@ onMounted(async () => {
 
   const parentElement = document.getElementById('parent-canvas')! // Replace with the actual ID or reference to the parent element
 
-  // Camera
-  const camera = new THREE.PerspectiveCamera(20, f.sizes.width / f.sizes.height, 0.01, 100)
-  // const aspectRatio = sizes.width / sizes.height
-  // const camera = new THREE.OrthographicCamera(- 1 * aspectRatio, 1 * aspectRatio, 1, - 1, 0.1, 100)
-
-  camera.position.set(0, 0, 5)
-  f.addToScene(camera)
-
-  f.resize(renderer, camera, f.sizes, parentElement)
-  f.cursor(f.sizes, camera)
+  f.resize(renderer, f.camera, f.sizes, parentElement)
+  f.cursor(f.sizes, f.camera)
 
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap // default THREE.PCFShadowMap
 
-  f.addToScene(settings.ambientLight)
-  f.addToScene(settings.light)
-
-  f.addToScene(settings.plane)
-
   // Controls
-  const controls = new OrbitControls(camera, canvas)
+  const controls = new OrbitControls(f.camera, canvas)
   controls.enableDamping = true
-  controls.maxPolarAngle = Math.PI / 2
+  // controls.maxPolarAngle = Math.PI / 2
 
-  // Set the minimum and maximum azimuthal angles
-  controls.minAzimuthAngle = -Math.PI / 2 // Minimum azimuthal angle (in radians)
-  controls.maxAzimuthAngle = Math.PI / 2 // Maximum azimuthal angle (in radians)
-
-  vertexTagsRef.value = vTag.vertexTags
-
-  const { boundingBoxes, fillMeshes, intersectMeshes, corners } = f.computeBoundingBoxes(
-    productMesh[0].children[2],
-    productMesh[0].children[0]
-  )
-
-  boundingBoxesRef.value = toRaw(boundingBoxes)
-  fillMeshesRef.value = toRaw(fillMeshes)
-  intersectMeshesRef.value = toRaw(intersectMeshes)
-  cornersRef.value = toRaw(corners)
-
-  //TODO: transform this into one fn
-
-  corners[0].rotation.y = Math.PI / 2
-  corners[0].rotation.x = Math.PI
-
-  corners[1].rotation.y = -Math.PI / 2
-  corners[1].rotation.x = Math.PI
-
-  corners[2].rotation.y = -Math.PI / 2
-
-  corners[3].rotation.y = Math.PI / 2
-
-  for (const corner of corners) {
-    if (corner instanceof THREE.Object3D) {
-      const box3 = new THREE.Box3().setFromObject(corner)
-
-      const dimension = new THREE.Vector3()
-      box3.getSize(dimension)
-
-      const boundingIntesect = new THREE.Mesh(
-        new THREE.BoxGeometry(dimension.x, dimension.y, dimension.z),
-        new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
-      )
-
-      corner.getWorldPosition(boundingIntesect.position)
-
-      boundingBoxes.push(boundingIntesect)
-    }
-  }
-
-  f.addToScene(fillMeshes)
-  f.addToScene(vTag.vertexTags)
-  f.addToScene(intersectMeshes)
-  f.addToScene(boundingBoxes)
-  f.addToScene(corners)
+  // // Set the minimum and maximum azimuthal angles
+  // controls.minAzimuthAngle = -Math.PI / 2 // Minimum azimuthal angle (in radians)
+  // controls.maxAzimuthAngle = Math.PI / 2 // Maximum azimuthal angle (in radians)
 
   console.log(appendixButtons)
 
@@ -391,104 +246,24 @@ onMounted(async () => {
         avgPosition.x -= 0.5
 
       appendix.appendix.position.copy(avgPosition)
-
-      // const box3 = new THREE.Box3().setFromObject(appendix.appendix)
-
-      // const helper = new THREE.Box3Helper(box3)
-
-      // f.addToScene(helper)
     }
   }
 
   function tick() {
-    for (const tag of vertexTagsRef.value) {
-      tag.lookAt(camera.position)
+    for (const tag of vTag.vertexTags) {
+      tag.lookAt(f.camera.position)
     }
 
     //Update controls
     controls.update()
 
     // Render
-    renderer.render(f.scene, camera)
+    renderer.render(f.scene, f.camera)
 
     window.requestAnimationFrame(tick)
   }
   tick()
-  // Add an event listener to the renderer's domElement
-  // renderer.domElement.addEventListener('mousedown', (event) => {
-  //   let startX, startY
-  //   if (!event.shiftKey) {
-  //     // Prevent camera rotation by disabling controls when SHIFT is held
-  //     controls.enabled = false
-
-  //     // Track initial mouse position
-  //     startX = event.clientX
-  //     startY = event.clientY
-
-  //     // Function to handle mousemove event
-  //     const onMouseMove = (e) => {
-  //       // Calculate the change in mouse position
-  //       const deltaX = e.clientX - startX
-  //       const deltaY = e.clientY - startY
-
-  //       // Adjust the camera position based on deltaX and deltaY
-  //       camera.position.x -= deltaX * 0.05 // Adjust the factor as needed
-  //       camera.position.y += deltaY * 0.05 // Adjust the factor as needed
-
-  //       // Update the controls target to keep it centered
-  //       controls.target.x -= deltaX * 0.05
-  //       controls.target.y += deltaY * 0.05
-
-  //       // Update the initial mouse position for the next move event
-  //       startX = e.clientX
-  //       startY = e.clientY
-
-  //       // Render the scene
-  //       renderer.render(f.scene, camera)
-  //     }
-
-  //     // Function to handle mouseup event
-  //     const onMouseUp = () => {
-  //       // Remove the mousemove and mouseup listeners
-  //       document.removeEventListener('mousemove', onMouseMove)
-  //       document.removeEventListener('mouseup', onMouseUp)
-
-  //       // Re-enable controls
-  //       controls.enabled = true
-  //     }
-
-  //     // Add mousemove and mouseup listeners
-  //     document.addEventListener('mousemove', onMouseMove)
-  //     document.addEventListener('mouseup', onMouseUp)
-  //   }
-  // })
-  // watchEffect(() => {
-  //   if(changeWidth.value) {
-  //     productMesh[7].children[0].morphTargetInfluences[0] = changeWidth.value
-  //     productMesh[7].children[1].morphTargetInfluences[0] = changeWidth.value
-  //   }
-  //   if(changeHeight.value) {
-  //     productMesh[7].children[0].morphTargetInfluences[1] = changeHeight.value
-  //     productMesh[7].children[1].morphTargetInfluences[1] = changeHeight.value
-  //   }
-  // })
-  // Function to create the line geometry and add it to the scene
-
-  // Watch for changes in points.length and recreate the line when it changes
-
-  watchEffect(() => {
-    if (points.length) {
-      console.log('RERENDER')
-      // Create a geometry with the points
-      const geometry = new THREE.BufferGeometry().setFromPoints(points)
-
-      // Create the line segments
-      const line = new THREE.Line(geometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }))
-
-      f.scene.add(line)
-
-      // tick()
-    }
-  })
 })
+
+watchEffect(() => {})
 </script>
