@@ -46,12 +46,12 @@ export function resize(renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveC
     
 }
 
-export function cursor(sizes: {width: number, height: number}, camera: THREE.Camera) {
+export function cursor(sizes: {width: number, height: number}, camera?: THREE.Camera) {
     window.addEventListener('mousemove', (event) => {
         pointer.x = event.clientX / sizes.width - 0.5
         pointer.y = -(event.clientY / sizes.height) + 0.5
     
-        raycaster.setFromCamera(pointer, camera)
+        raycaster.setFromCamera(pointer, camera!)
     })
 }
 

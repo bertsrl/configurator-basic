@@ -20,6 +20,6 @@ async function loadFont(path: string) {
     const fontData = await fontLoader.loadAsync(path)
     console.log("My font: ", fontData.data);
     
-    return fontData[0];
+    return fontData;
 }
 export { loadData, loadFont };

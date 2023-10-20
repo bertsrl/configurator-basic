@@ -55,7 +55,7 @@ for (const [index = 1, point] of points.slice(1).entries()) {
         
     });   
 
-    const appendix = group;
+    const appendix: THREE.Object3D = group;
 
     switch(index) {
         case 0:
@@ -74,6 +74,6 @@ for (const [index = 1, point] of points.slice(1).entries()) {
 
     appendix.scale.set(0.5, 0.5, 0.5);
 
-    appendixButtons.push({appendix , point1: points[index] , point2: points[index+1], itsHovered: true});
+    // appendixButtons.push({appendix , point1: points[index] , point2: points[index+1], itsHovered: true});
     console.log("appendixButtons ", appendixButtons)
 }

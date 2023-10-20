@@ -1,0 +1,72 @@
+
+> window-configurator-360@0.0.0 build
+> run-p type-check build-only
+
+
+> window-configurator-360@0.0.0 type-check
+> vue-tsc --noEmit -p tsconfig.app.json --composite false
+
+
+> window-configurator-360@0.0.0 build-only
+> vite build
+
+[36mvite v4.4.4 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 72 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                                            [39m[1m[2m    0.42 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[32massets/fa-regular-400-e42a8844.woff2                                  [39m[1m[2m   13.22 kB[22m[1m[22m
+[2mdist/[22m[32massets/fa-regular-400-cb9e9e69.woff                                   [39m[1m[2m   16.28 kB[22m[1m[22m
+[2mdist/[22m[32massets/KFOmCnqEu92Fr1Mu4mxM-f2abf7fb.woff                             [39m[1m[2m   20.34 kB[22m[1m[22m
+[2mdist/[22m[32massets/KFOlCnqEu92Fr1MmWUlfBBc--e0fd57c0.woff                         [39m[1m[2m   20.41 kB[22m[1m[22m
+[2mdist/[22m[32massets/KFOlCnqEu92Fr1MmSU5fBBc--bf14c7d7.woff                         [39m[1m[2m   20.42 kB[22m[1m[22m
+[2mdist/[22m[32massets/KFOlCnqEu92Fr1MmYUtfBBc--f6537e32.woff                         [39m[1m[2m   20.42 kB[22m[1m[22m
+[2mdist/[22m[32massets/KFOkCnqEu92Fr1MmgVxIIzQ-34e9582c.woff                          [39m[1m[2m   20.44 kB[22m[1m[22m
+[2mdist/[22m[32massets/KFOlCnqEu92Fr1MmEU9fBBc--9ce7f3ac.woff                         [39m[1m[2m   20.54 kB[22m[1m[22m
+[2mdist/[22m[32massets/Eva-Icons-f19a427f.woff2                                       [39m[1m[2m   25.95 kB[22m[1m[22m
+[2mdist/[22m[32massets/Eva-Icons-ba7db2a0.woff                                        [39m[1m[2m   33.24 kB[22m[1m[22m
+[2mdist/[22m[32massets/fa-brands-400-8ea87917.woff2                                   [39m[1m[2m   76.74 kB[22m[1m[22m
+[2mdist/[22m[32massets/fa-solid-900-9834b82a.woff2                                    [39m[1m[2m   78.27 kB[22m[1m[22m
+[2mdist/[22m[32massets/fa-brands-400-f9217f66.woff                                    [39m[1m[2m   89.99 kB[22m[1m[22m
+[2mdist/[22m[32massets/fa-solid-900-3f6d3488.woff                                     [39m[1m[2m  101.65 kB[22m[1m[22m
+[2mdist/[22m[32massets/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ-4a4dbc62.woff2              [39m[1m[2m  128.62 kB[22m[1m[22m
+[2mdist/[22m[32massets/oPWQ_lt5nv4pWNJpghLP75WiFR4kLh3kvmvRImcycg-d31bfb81.woff2      [39m[1m[2m  135.98 kB[22m[1m[22m
+[2mdist/[22m[32massets/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUcel5euIg-35dca8a7.woff2  [39m[1m[2m  155.28 kB[22m[1m[22m
+[2mdist/[22m[32massets/oPWQ_lt5nv4pWNJpghLP75WiFR4kLh3kvmvX-fa3888ef.woff             [39m[1m[2m  156.24 kB[22m[1m[22m
+[2mdist/[22m[32massets/flUhRq6tzZclQEJ-Vdg-IuiaDsNa-fd84f88b.woff                     [39m[1m[2m  164.91 kB[22m[1m[22m
+[2mdist/[22m[32massets/LDItaoyNOAY6Uewc665JcIzCKsKc_M9flwmPq_HTTw-c948f126.woff2      [39m[1m[2m  173.62 kB[22m[1m[22m
+[2mdist/[22m[32massets/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUcY-8e94758c.woff         [39m[1m[2m  182.03 kB[22m[1m[22m
+[2mdist/[22m[32massets/LDItaoyNOAY6Uewc665JcIzCKsKc_M9flwmJ-1c135b15.woff             [39m[1m[2m  206.26 kB[22m[1m[22m
+[2mdist/[22m[35massets/index-a1963a1d.css                                             [39m[1m[2m  280.21 kB[22m[1m[22m[2m │ gzip:  52.66 kB[22m
+[2mdist/[22m[36massets/index-69916a59.js                                              [39m[1m[33m1,168.33 kB[39m[22m[2m │ gzip: 334.94 kB[22m
+[32m✓ built in 3.89s[39m
+x src/components/Controls/AppendixAdd.vue(61,5): error TS2339: Property 'addPieces' does not exist on type 'typeof import("F:/Users/Andrei-PC/Projects/BRIEF/window-configurator-360/src/components/Environment/functions")'.
+src/components/Environment/Products/LoadData.ts(23,12): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type 'Font'.
+  Property '0' does not exist on type 'Font'.
+src/components/Environment/Settings/appendixButton.ts(77,27): error TS2345: Argument of type '{ appendix: THREE.Group; point1: THREE.Vector3; point2: THREE.Vector3; itsHovered: boolean; }' is not assignable to parameter of type 'Group'.
+  Object literal may only specify known properties, and 'appendix' does not exist in type 'Group'.
+src/Views/Experience.vue(124,12): error TS2345: Argument of type '{ key: number; name: any; icon: string; style: {}; }' is not assignable to parameter of type '{ name?: string | undefined; icon?: string | undefined; style?: unknown; key?: string | number | symbol | undefined; ref?: VNodeRef | undefined; ref_for?: boolean | undefined; ref_key?: string | undefined; ... 8 more ...; readonly camera: Camera; } & Record<...>'.
+  Type '{ key: number; name: any; icon: string; style: {}; }' is missing the following properties from type '{ name?: string | undefined; icon?: string | undefined; style?: unknown; key?: string | number | symbol | undefined; ref?: VNodeRef | undefined; ref_for?: boolean | undefined; ref_key?: string | undefined; ... 8 more ...; readonly camera: Camera; }': renderer, camera
+src/Views/Experience.vue(127,29): error TS2339: Property 'appendix' does not exist on type 'Group'.
+src/Views/Experience.vue(227,27): error TS2339: Property 'appendix' does not exist on type 'Group'.
+src/Views/Experience.vue(230,28): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(230,45): error TS2339: Property 'point2' does not exist on type 'Group'.
+src/Views/Experience.vue(233,18): error TS2339: Property 'appendix' does not exist on type 'Group'.
+src/Views/Experience.vue(235,20): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(235,45): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(235,67): error TS2339: Property 'point2' does not exist on type 'Group'.
+src/Views/Experience.vue(238,27): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(238,52): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(238,74): error TS2339: Property 'point2' does not exist on type 'Group'.
+src/Views/Experience.vue(242,20): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(242,45): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(242,67): error TS2339: Property 'point2' does not exist on type 'Group'.
+src/Views/Experience.vue(245,27): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(245,52): error TS2339: Property 'point1' does not exist on type 'Group'.
+src/Views/Experience.vue(245,74): error TS2339: Property 'point2' does not exist on type 'Group'.
+src/Views/Experience.vue(248,16): error TS2339: Property 'appendix' does not exist on type 'Group'.
+src/Views/ExperienceBackup.vue(193,19): error TS7016: Could not find a declaration file for module '@tweenjs/tween.js'. 'F:/Users/Andrei-PC/Projects/BRIEF/window-configurator-360/node_modules/@tweenjs/tween.js/dist/tween.esm.js' implicitly has an 'any' type.
+  There are types at 'F:/Users/Andrei-PC/Projects/BRIEF/window-configurator-360/node_modules/@tweenjs/tween.js/dist/tween.d.ts', but this result could not be resolved when respecting package.json "exports". The '@tweenjs/tween.js' library may need to update its package.json or typings.
+src/Views/ExperienceBackup.vue(270,5): error TS2554: Expected 2 arguments, but got 1.
+src/Views/ExperienceBackup.vue(334,43): error TS2339: Property 'computeBoundingBoxes' does not exist on type 'typeof import("F:/Users/Andrei-PC/Projects/BRIEF/window-configurator-360/src/components/Environment/functions")'.

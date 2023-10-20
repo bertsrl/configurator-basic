@@ -121,13 +121,13 @@
           "
         >
           <!-- Other buttons -->
-          <appendix-add
+          <!-- <appendix-add
             v-for="(appendix, index) in appendixButtons"
             :key="index"
             :name="appendix.appendix.name"
             icon="arrow_up"
             style="grid-column: auto"
-          />
+          /> -->
         </div>
         <scene-controller />
         <canvas id="canvas"></canvas>
@@ -194,7 +194,6 @@ onMounted(async () => {
   // Adding Loaded Mesh full version in the back as a dummy
   // f.addToScene(await f.addDummy())
 
-  
   // Canvas
   const canvas = document.getElementById('canvas')!
   console.log(canvas)
@@ -223,31 +222,31 @@ onMounted(async () => {
 
   console.log(appendixButtons)
 
-  for (const appendix of appendixButtons) {
-    f.addToScene(appendix.appendix)
-    // Calculate the average position of points at index 1 and index 2
-    const avgPosition = new THREE.Vector3()
-      .addVectors(appendix.point1, appendix.point2)
-      .multiplyScalar(0.5)
+  // for (const appendix of appendixButtons) {
+  //   f.addToScene(appendix.appendix)
+  //   // Calculate the average position of points at index 1 and index 2
+  //   const avgPosition = new THREE.Vector3()
+  //     .addVectors(appendix.point1, appendix.point2)
+  //     .multiplyScalar(0.5)
 
-    if (appendix.appendix instanceof THREE.Object3D) {
-      // Check if points have the same Y value
-      if (appendix.point1.y > 0 && appendix.point1.y === appendix.point2.y) {
-        // Adjust the position based on Y value
-        avgPosition.y += 0.5
-      } else if (appendix.point1.y < 0 && appendix.point1.y === appendix.point2.y)
-        avgPosition.y -= 0.5
+  //   if (appendix.appendix instanceof THREE.Object3D) {
+  //     // Check if points have the same Y value
+  //     if (appendix.point1.y > 0 && appendix.point1.y === appendix.point2.y) {
+  //       // Adjust the position based on Y value
+  //       avgPosition.y += 0.5
+  //     } else if (appendix.point1.y < 0 && appendix.point1.y === appendix.point2.y)
+  //       avgPosition.y -= 0.5
 
-      // Check if points have the same X value
-      if (appendix.point1.x > 0 && appendix.point1.x === appendix.point2.x) {
-        // Adjust the position based on Y value
-        avgPosition.x += 0.5
-      } else if (appendix.point1.x < 0 && appendix.point1.x === appendix.point2.x)
-        avgPosition.x -= 0.5
+  //     // Check if points have the same X value
+  //     if (appendix.point1.x > 0 && appendix.point1.x === appendix.point2.x) {
+  //       // Adjust the position based on Y value
+  //       avgPosition.x += 0.5
+  //     } else if (appendix.point1.x < 0 && appendix.point1.x === appendix.point2.x)
+  //       avgPosition.x -= 0.5
 
-      appendix.appendix.position.copy(avgPosition)
-    }
-  }
+  //     appendix.appendix.position.copy(avgPosition)
+  //   }
+  // }
 
   function tick() {
     for (const tag of vTag.vertexTags) {

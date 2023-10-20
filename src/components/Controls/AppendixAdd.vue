@@ -57,8 +57,6 @@ async function addFrameAppendix(name: string, renderer: THREE.WebGLRenderer, cam
     )
   }
   console.log('points push: ', points.points)
-
-  f.addPieces()
 }
 </script>
 <style lang=""></style>
