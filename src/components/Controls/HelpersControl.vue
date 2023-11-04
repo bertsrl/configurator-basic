@@ -44,6 +44,7 @@
   </q-btn-group>
 </template>
 <script setup>
+import * as THREE from 'three'
 import { ref, onMounted, toRaw } from 'vue'
 import * as f from '@/components/Environment/functions'
 import {
@@ -52,6 +53,8 @@ import {
   limitPoints,
   computeProduct
 } from '../Environment/Products/InitializeProduct'
+import { productRefMorphMeshes } from '@/store'
+import * as dat from 'lil-gui'
 
 const toggleBoundingBoxes = ref(true)
 const toggleLimitPoints = ref(true)
@@ -62,16 +65,10 @@ const fillMeshesRef = ref([])
 const limitPointsRef = ref([])
 
 console.log('limitPoints: ', limitPoints, 'boundingBoxes: ', boundingBoxes)
+// Debug
+const gui = new dat.GUI()
 
 onMounted(async () => {
-  const product_group = await computeProduct()
-  product_group.scale.multiplyScalar(0.025)
-
-  product_group.position.set(-1, -1, 0)
-  product_group.rotation.y = Math.PI / 2
-
-  f.scene.add(product_group)
-
   boundingBoxesRef.value = boundingBoxes
   fillMeshesRef.value = fillMeshes
   limitPointsRef.value = limitPoints

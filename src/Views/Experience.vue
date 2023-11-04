@@ -171,7 +171,8 @@ import { appendixButtons } from '@/components/Environment/Settings/appendixButto
 import AppendixAdd from '@/components/Controls/AppendixAdd.vue'
 import SceneController from '@/components/Environment/Init/SceneController.vue'
 import HelpersControl from '@/components/Controls/HelpersControl.vue'
-import { computeProduct } from '@/components/Environment/Products/InitializeProduct'
+import { computeProduct, boundingBoxes } from '@/components/Environment/Products/InitializeProduct'
+import { instance } from 'three/examples/jsm/nodes/Nodes.js'
 
 const hex = ref('green')
 const colorOptions = ref([
@@ -183,6 +184,8 @@ const colorOptions = ref([
 
 const changeWidth = ref(0)
 const changeHeight = ref(0)
+const morphMeshesRef = ref()
+const mappedBoxScaleRef = ref()
 
 const myPoints = ref()
 myPoints.value = points
@@ -191,6 +194,67 @@ myPoints.value = points
 const gui = new dat.GUI()
 
 onMounted(async () => {
+  const product_group = await computeProduct()
+  product_group.scale.multiplyScalar(0.025)
+
+  product_group.position.set(-1, -1, 0)
+  product_group.rotation.y = Math.PI / 2
+
+  f.scene.add(product_group)
+
+  console.log(product_group)
+
+  const { morphMeshes } = f.unwrapChildren(product_group)
+  morphMeshesRef.value = morphMeshes
+
+  console.log(morphMeshes)
+
+  console.log('boundingBoxes: ', boundingBoxes)
+  const data = {
+    scale: 0,
+    boxScale: 1
+  }
+
+  for (const box of boundingBoxes) {
+    box.scale.z = 1 / 3
+    box.scale.y = 1 / 3
+  }
+
+  const scaleFolder = gui.addFolder('Scale')
+  scaleFolder
+    .add(data, 'scale', 0, 1)
+    .step(0.01)
+    .name('mesh 0 scale z')
+    .onChange(() => {
+      for (const mesh of morphMeshes) {
+        if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+          mesh.morphTargetInfluences[0] = data.scale
+          mesh.morphTargetInfluences[1] = data.scale
+
+          const mappedBoxScale = minBoxScale + data.scale * (maxBoxScale - minBoxScale)
+
+          mappedBoxScaleRef.value = mappedBoxScale
+
+          // Apply scaled box scale to boundingBoxes
+          for (const box of boundingBoxes) {
+            box.scale.z = mappedBoxScale
+            box.scale.y = mappedBoxScale
+          }
+        }
+      }
+    })
+
+  scaleFolder
+    .add(data, 'boxScale', 1, 3)
+    .step(0.02)
+    .name('boxScale')
+    .onChange(() => {
+      for (const box of boundingBoxes) {
+        box.scale.z = data.boxScale / 3
+        box.scale.y = data.boxScale / 3
+      }
+    })
+
   // Adding Loaded Mesh full version in the back as a dummy
   // f.addToScene(await f.addDummy())
 
@@ -264,5 +328,44 @@ onMounted(async () => {
   tick()
 })
 
-watchEffect(() => {})
+watchEffect(() => {
+  if (changeWidth.value) {
+    for (const mesh of morphMeshesRef.value) {
+      if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+        mesh.morphTargetInfluences[0] = changeWidth.value
+
+        // Map data.scale to box scale between 1/3 and 1
+        const minBoxScale = 1 / 3
+        const maxBoxScale = 1
+
+        const mappedBoxScale = minBoxScale + changeWidth.value * (maxBoxScale - minBoxScale)
+
+        mappedBoxScaleRef.value = mappedBoxScale
+
+        for (const box of boundingBoxes) {
+          box.scale.z = mappedBoxScaleRef.value
+        }
+      }
+    }
+  }
+  if (changeHeight.value) {
+    for (const mesh of morphMeshesRef.value) {
+      if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+        mesh.morphTargetInfluences[1] = changeHeight.value
+
+        // Map data.scale to box scale between 1/3 and 1
+        const minBoxScale = 1 / 3
+        const maxBoxScale = 1
+
+        const mappedBoxScale = minBoxScale + changeHeight.value * (maxBoxScale - minBoxScale)
+
+        mappedBoxScaleRef.value = mappedBoxScale
+
+        for (const box of boundingBoxes) {
+          box.scale.y = mappedBoxScaleRef.value
+        }
+      }
+    }
+  }
+})
 </script>

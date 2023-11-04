@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
 
+import { boundingBoxesRef, productRefMorphMeshes } from '@/store'
+
 import { loadData } from "./Products/LoadData"
 import { toRaw } from 'vue'
 
@@ -111,3 +113,26 @@ export async function addDummy() {
 
     return productMesh
 } 
+
+export function unwrapChildren(window: THREE.Object3D) {
+  const morphMeshes = []
+  console.log("window: ", window)
+
+  for(const rehau_group of window.children) {
+    if(rehau_group instanceof THREE.Object3D) {
+      const rehau_profile = rehau_group.children[0]
+
+      for(const rehau_component of rehau_profile.children) {
+        if(rehau_component instanceof THREE.Object3D) {
+          for(const mesh of rehau_component.children) {
+            if(mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+              morphMeshes.push(mesh)
+            }
+          }
+        }        
+      }
+    }
+  }
+
+  return { morphMeshes, boundingBoxesRef }
+}

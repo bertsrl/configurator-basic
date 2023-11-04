@@ -10,13 +10,15 @@ export async function computeRehauGroup() {
 
   console.log("Am fost invocat", boundingBoxes, fillMeshes, limitPoints)
   // ---------------- Rehau Group Start
-  const product = await loadData('./models/Dora/profile_extended.gltf')
+  const product = await loadData('./models/Dora/profile_extended_new_center.glb')
   console.log(product)
 
   const box3 = new THREE.Box3().setFromObject(product[0])
 
   const dimension = new THREE.Vector3()
   box3.getSize(dimension)
+
+  console.log("dimension: ", dimension)
 
   const boundingIntesect = new THREE.Mesh(
       new THREE.BoxGeometry(dimension.x, dimension.y, dimension.z),
@@ -28,12 +30,17 @@ export async function computeRehauGroup() {
   const middlePoint = new THREE.Vector3();
   box3.getCenter(middlePoint);
 
-  boundingIntesect.position.copy(middlePoint)
+  boundingIntesect.position.set(
+    middlePoint.x, 
+    middlePoint.y,
+    middlePoint.z
+    )
+
   product[0].add(boundingIntesect)
 
   // Calculate the end point of the bounding box along the Y-axis
-  const endZ = middlePoint.z + dimension.z / 2
-  const endY = middlePoint.y + dimension.y / 2
+  const endZ = middlePoint.z + dimension.z / 6
+  const endY = middlePoint.y + dimension.y / 6
   const startY = middlePoint.y - dimension.y / 2
   const startZ = middlePoint.z - dimension.z / 2
   
