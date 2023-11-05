@@ -4,7 +4,6 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 async function loadData(path: string) {
-
     const gltfLoader = new GLTFLoader();
     const productData = await gltfLoader.loadAsync(path); 
     

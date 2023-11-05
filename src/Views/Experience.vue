@@ -109,6 +109,7 @@
       <helpers-control />
     </div>
     <div id="content">
+      <loading-screen v-if="store.isLoading.value === true" />
       <div id="parent-canvas">
         <tools-control />
         <div
@@ -119,16 +120,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
           "
-        >
-          <!-- Other buttons -->
-          <!-- <appendix-add
-            v-for="(appendix, index) in appendixButtons"
-            :key="index"
-            :name="appendix.appendix.name"
-            icon="arrow_up"
-            style="grid-column: auto"
-          /> -->
-        </div>
+        ></div>
         <scene-controller />
         <canvas id="canvas"></canvas>
       </div>
@@ -153,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onBeforeUpdate, nextTick } from 'vue'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
 
@@ -162,6 +154,7 @@ import { ref, toRaw, watch, watchEffect } from 'vue'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as f from '@/components/Environment/functions'
 import * as vTag from '@/components/Environment/vertexTag'
+import * as settings from '@/components/Environment/Settings/'
 import { loadData } from '@/components/Environment/Products/LoadData'
 import SizeControl from '@/components/Controls/SizeControl.vue'
 import ColorControl from '@/components/Controls/ColorControl.vue'
@@ -172,7 +165,10 @@ import AppendixAdd from '@/components/Controls/AppendixAdd.vue'
 import SceneController from '@/components/Environment/Init/SceneController.vue'
 import HelpersControl from '@/components/Controls/HelpersControl.vue'
 import { computeProduct, boundingBoxes } from '@/components/Environment/Products/InitializeProduct'
-import { instance } from 'three/examples/jsm/nodes/Nodes.js'
+import * as store from '@/store'
+import * as meter from '@/components/Environment/Settings'
+import LoadingScreen from '@/components/Environment/Init/LoadingScreen.vue'
+import { tiBackLeft } from '@quasar/extras/themify'
 
 const hex = ref('green')
 const colorOptions = ref([
@@ -187,6 +183,9 @@ const changeHeight = ref(0)
 const morphMeshesRef = ref()
 const mappedBoxScaleRef = ref()
 
+const rendererRef = ref()
+const controlsRef = ref()
+
 const myPoints = ref()
 myPoints.value = points
 
@@ -194,6 +193,8 @@ myPoints.value = points
 const gui = new dat.GUI()
 
 onMounted(async () => {
+  store.isLoading.value = true
+
   const product_group = await computeProduct()
   product_group.scale.multiplyScalar(0.025)
 
@@ -204,7 +205,7 @@ onMounted(async () => {
 
   console.log(product_group)
 
-  const { morphMeshes } = f.unwrapChildren(product_group)
+  const morphMeshes = await f.unwrapChildren(product_group)
   morphMeshesRef.value = morphMeshes
 
   console.log(morphMeshes)
@@ -214,6 +215,11 @@ onMounted(async () => {
     scale: 0,
     boxScale: 1
   }
+  // Map data.scale to box scale between 1/3 and 1
+  const minBoxScale = 1 / 3
+  const maxBoxScale = 1
+
+  const mappedBoxScale = minBoxScale + data.scale * (maxBoxScale - minBoxScale)
 
   for (const box of boundingBoxes) {
     box.scale.z = 1 / 3
@@ -244,17 +250,6 @@ onMounted(async () => {
       }
     })
 
-  scaleFolder
-    .add(data, 'boxScale', 1, 3)
-    .step(0.02)
-    .name('boxScale')
-    .onChange(() => {
-      for (const box of boundingBoxes) {
-        box.scale.z = data.boxScale / 3
-        box.scale.y = data.boxScale / 3
-      }
-    })
-
   // Adding Loaded Mesh full version in the back as a dummy
   // f.addToScene(await f.addDummy())
 
@@ -267,6 +262,8 @@ onMounted(async () => {
     canvas: canvas
   })
 
+  rendererRef.value = renderer
+
   const parentElement = document.getElementById('parent-canvas')! // Replace with the actual ID or reference to the parent element
 
   f.resize(renderer, f.camera, f.sizes, parentElement)
@@ -278,6 +275,7 @@ onMounted(async () => {
   // Controls
   const controls = new OrbitControls(f.camera, canvas)
   controls.enableDamping = true
+  controlsRef.value = controls
   // controls.maxPolarAngle = Math.PI / 2
 
   // // Set the minimum and maximum azimuthal angles
@@ -312,60 +310,133 @@ onMounted(async () => {
   //   }
   // }
 
-  function tick() {
-    for (const tag of vTag.vertexTags) {
-      tag.lookAt(f.camera.position)
-    }
-
-    //Update controls
-    controls.update()
-
-    // Render
-    renderer.render(f.scene, f.camera)
-
-    window.requestAnimationFrame(tick)
-  }
   tick()
 })
 
-watchEffect(() => {
-  if (changeWidth.value) {
+function tick() {
+  //Update controls
+  controlsRef.value.update()
+
+  // Render
+  rendererRef.value.render(f.scene, f.camera)
+
+  window.requestAnimationFrame(tick)
+}
+
+onBeforeUpdate(async () => {
+  setTimeout(() => {
+    // Loading completed, set isLoading to false
+    store.isLoading.value = false
+  }, 1000) // Simulating a 3-second loading time, adjust as needed
+})
+
+const widthChanging = ref(false)
+const heightChanging = ref(false)
+
+watch(changeWidth, (newVal, oldVal) => {
+  if (newVal !== oldVal && !heightChanging.value) {
+    widthChanging.value = true
+
     for (const mesh of morphMeshesRef.value) {
       if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
         mesh.morphTargetInfluences[0] = changeWidth.value
-
-        // Map data.scale to box scale between 1/3 and 1
-        const minBoxScale = 1 / 3
-        const maxBoxScale = 1
-
-        const mappedBoxScale = minBoxScale + changeWidth.value * (maxBoxScale - minBoxScale)
-
-        mappedBoxScaleRef.value = mappedBoxScale
-
-        for (const box of boundingBoxes) {
-          box.scale.z = mappedBoxScaleRef.value
-        }
       }
     }
+
+    // Map data.scale to box scale between 1/3 and 1
+    const minBoxScale = 1 / 3
+    const maxBoxScale = 1
+
+    const mappedBoxScale = minBoxScale + changeWidth.value * (maxBoxScale - minBoxScale)
+
+    mappedBoxScaleRef.value = mappedBoxScale
+
+    for (const box of boundingBoxes) {
+      box.scale.z = mappedBoxScaleRef.value
+    }
+
+    const mappedWidth = 1 + changeWidth.value
+
+    console.log('boungingBoxes[0].width: ', boundingBoxes[0].scale.x, 'mappedWidth: ', mappedWidth)
+    store.meters.x.scale.x = mappedWidth
+    store.meters.y.position.x = store.windowRef.value.position.x + mappedWidth * 1.5
+    store.textMeshes.windowHeightText.position.x = store.meters.y.position.x + 0.1
+    store.units.width = changeWidth.value //TODO: De asociat cu intervalul pe care il da user-ul ca min max warranty
+
+    meter.createText(store.units.width).then((newTextMesh) => {
+      console.log(toRaw(store.textMeshes.windowWidthText))
+
+      const oldText: THREE.Object3D = toRaw(store.textMeshes.windowWidthText)
+
+      newTextMesh.position.copy(oldText.position)
+      newTextMesh.scale.copy(oldText.scale)
+
+      if (toRaw(store.textMeshes.windowWidthText)) {
+        f.scene.remove(toRaw(store.textMeshes.windowWidthText))
+        rendererRef.value.renderLists.dispose()
+      }
+
+      store.textMeshes.windowWidthText = newTextMesh
+      f.scene.add(newTextMesh)
+    })
+
+    widthChanging.value = false
   }
-  if (changeHeight.value) {
+})
+
+watch(changeHeight, (newVal, oldVal) => {
+  if (newVal !== oldVal && !widthChanging.value) {
+    heightChanging.value = true
+
     for (const mesh of morphMeshesRef.value) {
       if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
         mesh.morphTargetInfluences[1] = changeHeight.value
-
-        // Map data.scale to box scale between 1/3 and 1
-        const minBoxScale = 1 / 3
-        const maxBoxScale = 1
-
-        const mappedBoxScale = minBoxScale + changeHeight.value * (maxBoxScale - minBoxScale)
-
-        mappedBoxScaleRef.value = mappedBoxScale
-
-        for (const box of boundingBoxes) {
-          box.scale.y = mappedBoxScaleRef.value
-        }
       }
     }
+
+    // Map data.scale to box scale between 1/3 and 1
+    const minBoxScale = 1 / 3
+    const maxBoxScale = 1
+
+    const mappedBoxScale = minBoxScale + changeHeight.value * (maxBoxScale - minBoxScale)
+
+    mappedBoxScaleRef.value = mappedBoxScale
+
+    for (const box of boundingBoxes) {
+      box.scale.y = mappedBoxScaleRef.value
+    }
+
+    const mappedHeight = 1 + changeHeight.value
+
+    console.log(
+      'boungingBoxes[0].height: ',
+      boundingBoxes[0].scale.y,
+      'mappedHeight: ',
+      mappedHeight
+    )
+    store.meters.y.scale.y = mappedHeight
+    store.meters.x.position.y = store.windowRef.value.position.y + mappedHeight * 1.5
+    store.textMeshes.windowWidthText.position.y = store.meters.x.position.y + 0.1
+    store.units.height = changeHeight.value //TODO: De asociat cu intervalul pe care il da user-ul ca min max warranty
+
+    meter.createText(store.units.height).then((newTextMesh) => {
+      console.log('Running', toRaw(store.textMeshes.windowHeightText))
+
+      const oldText: THREE.Object3D = toRaw(store.textMeshes.windowHeightText)
+
+      newTextMesh.position.copy(oldText.position)
+      newTextMesh.scale.copy(oldText.scale)
+
+      if (toRaw(store.textMeshes.windowHeightText)) {
+        f.scene.remove(toRaw(store.textMeshes.windowHeightText))
+        rendererRef.value.renderLists.dispose()
+      }
+
+      store.textMeshes.windowHeightText = newTextMesh
+      f.scene.add(newTextMesh)
+    })
+
+    heightChanging.value = false
   }
 })
 </script>

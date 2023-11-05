@@ -40,9 +40,9 @@ export async function computeRehauGroup() {
 
   // Calculate the end point of the bounding box along the Y-axis
   const endZ = middlePoint.z + dimension.z / 6
-  const endY = middlePoint.y + dimension.y / 6
-  const startY = middlePoint.y - dimension.y / 2
-  const startZ = middlePoint.z - dimension.z / 2
+  const endY = middlePoint.y + dimension.y / 6.05
+  const startY = middlePoint.y - dimension.y / 6
+  const startZ = middlePoint.z - dimension.z / 6
   
   console.log("rehau group z size: ", endZ - startZ)
   
@@ -70,7 +70,7 @@ export async function computeRehauGroup() {
 
   const rehau_group = new THREE.Group();
 
-  rehau_group.add(product[0], boundingIntesect, pointLight, z_end_pointLight, y_end_pointLight, z_start_pointLight, y_start_pointLight)
+  rehau_group.add(product[0], boundingIntesect)
 
   return {group: rehau_group, middlePoint, startZ, endZ, startY, endY};
   

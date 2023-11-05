@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
-
-import { boundingBoxesRef, productRefMorphMeshes } from '@/store'
+import * as settings from './Settings/'
+import * as store from '@/store'
 
 import { loadData } from "./Products/LoadData"
 import { toRaw } from 'vue'
@@ -114,9 +114,29 @@ export async function addDummy() {
     return productMesh
 } 
 
-export function unwrapChildren(window: THREE.Object3D) {
+export async function unwrapChildren(window: THREE.Object3D) {
   const morphMeshes = []
   console.log("window: ", window)
+  
+  const box3 = new THREE.Box3().setFromObject(window)
+
+  const dimension = new THREE.Vector3()
+  box3.getSize(dimension)
+
+  window.position.y += 1
+  
+  console.log("window dimension: ",dimension)
+  const meterX = await settings.provideMeterX(dimension.x / 2, window.position) 
+  const meterY = await settings.provideMeterY(dimension.y / 2, window.position) 
+
+  scene.add(meterX)
+  scene.add(meterY)
+  
+  store.meters.x = meterX
+  store.meters.y = meterY
+
+  console.log("store.meters: ", store.meters.x, store.meters.y)
+  store.windowRef.value = window 
 
   for(const rehau_group of window.children) {
     if(rehau_group instanceof THREE.Object3D) {
@@ -134,5 +154,5 @@ export function unwrapChildren(window: THREE.Object3D) {
     }
   }
 
-  return { morphMeshes, boundingBoxesRef }
+  return morphMeshes
 }
