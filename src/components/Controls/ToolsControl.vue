@@ -3,49 +3,25 @@
     <q-list dark bordered separator class="no-border">
       <q-item clickable v-ripple>
         <q-item-section>
-          <q-icon size="32px" color="primary" name="undo" />
-          <q-item-label>Undo</q-item-label>
+          <q-icon size="32px" color="primary" name="restart_alt" />
+          <q-item-label>Reset</q-item-label>
         </q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple>
-        <q-item-section>
-          <q-icon size="32px" color="primary" name="redo" />
-          <q-item-label>Redo</q-item-label>
-        </q-item-section>
-      </q-item>
-
-      <q-item clickable v-ripple @click="dragActive = dragActive === true ? false : true">
-        <q-item-section>
-          <q-item-section>
-            <q-icon v-if="dragActive" size="32px" color="primary" name="pan_tool" />
-            <q-icon v-else size="32px" color="primary" name="do_not_disturb_on" />
-            <q-item-label>Drag</q-item-label>
-          </q-item-section>
-        </q-item-section>
-      </q-item>
-
-      <q-item clickable v-ripple>
-        <q-item-section>
-          <q-icon size="32px" color="primary" name="cameraswitch" />
-          <q-item-label>Front</q-item-label>
-        </q-item-section>
-      </q-item>
-
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple @click="store.isMetricsEnabled.value = metricsVisibility">
         <q-item-section>
           <q-item-section>
             <q-icon size="32px" color="primary" name="square_foot" />
-            <q-item-label>Metrics </q-item-label>
+            <q-item-label>Metrics</q-item-label>
           </q-item-section>
         </q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple @click="store.isProfileLook.value = profileLook">
         <q-item-section>
           <q-item-section>
             <q-icon size="32px" color="primary" name="crop_free" />
-            <q-item-label>Up</q-item-label>
+            <q-item-label>Profile</q-item-label>
           </q-item-section>
         </q-item-section>
       </q-item>
@@ -53,9 +29,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import * as store from '@/store'
+import * as f from '@/components/Environment/functions'
+import * as THREE from 'three'
+import { compute } from 'three/examples/jsm/nodes/Nodes.js'
 
 const dragActive = ref(true)
+
+const metricsVisibility = computed(() => {
+  return store.isMetricsEnabled.value ? false : true
+})
+
+const profileLook = computed(() => {
+  return store.isProfileLook.value ? false : true
+})
 </script>
 <style lang="scss" scoped>
 .toolbox {

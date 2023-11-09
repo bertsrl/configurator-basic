@@ -145,11 +145,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUpdate, nextTick } from 'vue'
+import { onMounted, onBeforeUpdate, nextTick, computed } from 'vue'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
 
-import { ref, toRaw, watch, watchEffect } from 'vue'
+import { ref, reactive, toRaw, watch, watchEffect } from 'vue'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as f from '@/components/Environment/functions'
@@ -168,7 +168,6 @@ import { computeProduct, boundingBoxes } from '@/components/Environment/Products
 import * as store from '@/store'
 import * as meter from '@/components/Environment/Settings'
 import LoadingScreen from '@/components/Environment/Init/LoadingScreen.vue'
-import { tiBackLeft } from '@quasar/extras/themify'
 
 const hex = ref('green')
 const colorOptions = ref([
@@ -182,6 +181,10 @@ const changeWidth = ref(0)
 const changeHeight = ref(0)
 const morphMeshesRef = ref()
 const mappedBoxScaleRef = ref()
+const glassRef = reactive({
+  mesh: ref(),
+  initalSize: ref()
+})
 
 const rendererRef = ref()
 const controlsRef = ref()
@@ -191,6 +194,7 @@ myPoints.value = points
 
 // Debug
 const gui = new dat.GUI()
+const scaleFolder = gui.addFolder('Scale')
 
 onMounted(async () => {
   store.isLoading.value = true
@@ -203,52 +207,70 @@ onMounted(async () => {
 
   f.scene.add(product_group)
 
-  console.log(product_group)
+  console.log('product_group: ', product_group)
 
   const morphMeshes = await f.unwrapChildren(product_group)
   morphMeshesRef.value = morphMeshes
 
-  console.log(morphMeshes)
+  const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
 
+  const glass = product[1]
+  store.windowRef.value.add(toRaw(glass)) //TODO: De corectat chestia asta pentru ca provoaca probleme. Spre exemplu in ColorControl.vue trebuie sa adaug un if(... !== undefined)
+
+  const box3 = new THREE.Box3().setFromObject(glass)
+
+  const dimension = new THREE.Vector3()
+  box3.getSize(dimension)
+
+  console.log('glass dimension: ', dimension)
+
+  console.log('glass: ', glass)
+
+  glass.position.set(0, 0, 0)
+
+  const glassData = {
+    x: glass.scale.x,
+    y: glass.scale.y,
+    z: glass.scale.z
+  }
+  scaleFolder
+    .add(glassData, 'x', glass.scale.x, 10)
+    .step(0.01)
+    .name('mesh 0 scale z')
+    .onChange(() => {
+      glass.scale.x = glassData.x
+    })
+  scaleFolder
+    .add(glassData, 'y', glass.scale.y, 10)
+    .step(0.01)
+    .name('mesh 0 scale y')
+    .onChange(() => {
+      glass.scale.y = glassData.y
+    })
+  scaleFolder
+    .add(glassData, 'z', glass.scale.z, 10)
+    .step(0.01)
+    .name('mesh 0 scale z')
+    .onChange(() => {
+      glass.scale.z = glassData.z
+    })
+
+  glass.scale.set(glass.scale.x, glass.scale.y * 2, glass.scale.z * 2)
+
+  glassRef.mesh = glass
+  glassRef.initalSize = new THREE.Vector3(glass.scale.x, glass.scale.y, glass.scale.z)
+
+  console.log(morphMeshes)
   console.log('boundingBoxes: ', boundingBoxes)
   const data = {
     scale: 0,
     boxScale: 1
   }
-  // Map data.scale to box scale between 1/3 and 1
-  const minBoxScale = 1 / 3
-  const maxBoxScale = 1
-
-  const mappedBoxScale = minBoxScale + data.scale * (maxBoxScale - minBoxScale)
 
   for (const box of boundingBoxes) {
     box.scale.z = 1 / 3
     box.scale.y = 1 / 3
   }
-
-  const scaleFolder = gui.addFolder('Scale')
-  scaleFolder
-    .add(data, 'scale', 0, 1)
-    .step(0.01)
-    .name('mesh 0 scale z')
-    .onChange(() => {
-      for (const mesh of morphMeshes) {
-        if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
-          mesh.morphTargetInfluences[0] = data.scale
-          mesh.morphTargetInfluences[1] = data.scale
-
-          const mappedBoxScale = minBoxScale + data.scale * (maxBoxScale - minBoxScale)
-
-          mappedBoxScaleRef.value = mappedBoxScale
-
-          // Apply scaled box scale to boundingBoxes
-          for (const box of boundingBoxes) {
-            box.scale.z = mappedBoxScale
-            box.scale.y = mappedBoxScale
-          }
-        }
-      }
-    })
 
   // Adding Loaded Mesh full version in the back as a dummy
   // f.addToScene(await f.addDummy())
@@ -275,7 +297,10 @@ onMounted(async () => {
   // Controls
   const controls = new OrbitControls(f.camera, canvas)
   controls.enableDamping = true
+  // Disable screen dragging if store.isDraggable is false
+
   controlsRef.value = controls
+
   // controls.maxPolarAngle = Math.PI / 2
 
   // // Set the minimum and maximum azimuthal angles
@@ -315,7 +340,7 @@ onMounted(async () => {
 
 function tick() {
   //Update controls
-  controlsRef.value.update()
+  if (store.isDraggable.value) controlsRef.value.update()
 
   // Render
   rendererRef.value.render(f.scene, f.camera)
@@ -333,6 +358,40 @@ onBeforeUpdate(async () => {
 const widthChanging = ref(false)
 const heightChanging = ref(false)
 
+watchEffect(() => {
+  if (store.isCameraswitchSelected.value) {
+    console.log('Camera Switch!')
+    f.camera.position.set(0, 0, 11)
+  }
+})
+
+watch(store.isProfileLook, (newVal) => {
+  if (newVal) {
+    const profileGroupMiddle = new THREE.Vector3(
+      toRaw(store.windowRef.value.children[0].position.x) - 0.5,
+      toRaw(store.windowRef.value.children[0].position.y) - 0.5,
+      toRaw(store.windowRef.value.children[0].position.z)
+    )
+
+    f.camera.lookAt(profileGroupMiddle)
+
+    f.provideProfileView()
+  }
+})
+
+watch(store.isMetricsEnabled, (newVal) => {
+  if (newVal) {
+    store.textMeshes.windowHeightText.visible = true
+    store.textMeshes.windowWidthText.visible = true
+    store.meters.x.visible = true
+    store.meters.y.visible = true
+  } else {
+    store.textMeshes.windowHeightText.visible = false
+    store.textMeshes.windowWidthText.visible = false
+    store.meters.x.visible = false
+    store.meters.y.visible = false
+  }
+})
 watch(changeWidth, (newVal, oldVal) => {
   if (newVal !== oldVal && !heightChanging.value) {
     widthChanging.value = true
@@ -363,22 +422,33 @@ watch(changeWidth, (newVal, oldVal) => {
     store.textMeshes.windowHeightText.position.x = store.meters.y.position.x + 0.1
     store.units.width = changeWidth.value //TODO: De asociat cu intervalul pe care il da user-ul ca min max warranty
 
-    meter.createText(store.units.width).then((newTextMesh) => {
-      console.log(toRaw(store.textMeshes.windowWidthText))
+    if (store.isMetricsEnabled.value)
+      meter.createText(store.units.width).then((newTextMesh) => {
+        console.log(toRaw(store.textMeshes.windowWidthText))
 
-      const oldText: THREE.Object3D = toRaw(store.textMeshes.windowWidthText)
+        const oldText: THREE.Object3D = toRaw(store.textMeshes.windowWidthText)
 
-      newTextMesh.position.copy(oldText.position)
-      newTextMesh.scale.copy(oldText.scale)
+        newTextMesh.position.copy(oldText.position)
+        newTextMesh.scale.copy(oldText.scale)
 
-      if (toRaw(store.textMeshes.windowWidthText)) {
-        f.scene.remove(toRaw(store.textMeshes.windowWidthText))
-        rendererRef.value.renderLists.dispose()
-      }
+        if (toRaw(store.textMeshes.windowWidthText)) {
+          f.scene.remove(toRaw(store.textMeshes.windowWidthText))
+          rendererRef.value.renderLists.dispose()
+        }
 
-      store.textMeshes.windowWidthText = newTextMesh
-      f.scene.add(newTextMesh)
-    })
+        store.textMeshes.windowWidthText = newTextMesh
+        f.scene.add(newTextMesh)
+      })
+
+    const glassInitialSize = toRaw(glassRef.initalSize)
+
+    // Map data.scale to box scale between 1/3 and 1
+    const minGlassSize = glassInitialSize.y
+    const maxGlassSize = 10
+
+    const mappedGlassScale = minGlassSize + changeWidth.value * (maxGlassSize - minGlassSize)
+
+    glassRef.mesh.scale.y = mappedGlassScale
 
     widthChanging.value = false
   }
@@ -419,22 +489,33 @@ watch(changeHeight, (newVal, oldVal) => {
     store.textMeshes.windowWidthText.position.y = store.meters.x.position.y + 0.1
     store.units.height = changeHeight.value //TODO: De asociat cu intervalul pe care il da user-ul ca min max warranty
 
-    meter.createText(store.units.height).then((newTextMesh) => {
-      console.log('Running', toRaw(store.textMeshes.windowHeightText))
+    if (store.isMetricsEnabled.value)
+      meter.createText(store.units.height).then((newTextMesh) => {
+        console.log('Running', toRaw(store.textMeshes.windowHeightText))
 
-      const oldText: THREE.Object3D = toRaw(store.textMeshes.windowHeightText)
+        const oldText: THREE.Object3D = toRaw(store.textMeshes.windowHeightText)
 
-      newTextMesh.position.copy(oldText.position)
-      newTextMesh.scale.copy(oldText.scale)
+        newTextMesh.position.copy(oldText.position)
+        newTextMesh.scale.copy(oldText.scale)
 
-      if (toRaw(store.textMeshes.windowHeightText)) {
-        f.scene.remove(toRaw(store.textMeshes.windowHeightText))
-        rendererRef.value.renderLists.dispose()
-      }
+        if (toRaw(store.textMeshes.windowHeightText)) {
+          f.scene.remove(toRaw(store.textMeshes.windowHeightText))
+          rendererRef.value.renderLists.dispose()
+        }
 
-      store.textMeshes.windowHeightText = newTextMesh
-      f.scene.add(newTextMesh)
-    })
+        store.textMeshes.windowHeightText = newTextMesh
+        f.scene.add(newTextMesh)
+      })
+
+    const glassInitialSize = toRaw(glassRef.initalSize)
+
+    // Map data.scale to box scale between 1/3 and 1
+    const minGlassSize = glassInitialSize.z
+    const maxGlassSize = 10
+
+    const mappedGlassScale = minGlassSize + changeHeight.value * (maxGlassSize - minGlassSize)
+
+    glassRef.mesh.scale.z = mappedGlassScale
 
     heightChanging.value = false
   }

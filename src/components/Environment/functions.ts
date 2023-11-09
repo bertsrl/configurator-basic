@@ -122,10 +122,11 @@ export async function unwrapChildren(window: THREE.Object3D) {
 
   const dimension = new THREE.Vector3()
   box3.getSize(dimension)
-
-  window.position.y += 1
   
   console.log("window dimension: ",dimension)
+
+  window.position.set(0, 0, 0)
+  
   const meterX = await settings.provideMeterX(dimension.x / 2, window.position) 
   const meterY = await settings.provideMeterY(dimension.y / 2, window.position) 
 
@@ -138,12 +139,20 @@ export async function unwrapChildren(window: THREE.Object3D) {
   console.log("store.meters: ", store.meters.x, store.meters.y)
   store.windowRef.value = window 
 
+  let index = 0;
+  
   for(const rehau_group of window.children) {
     if(rehau_group instanceof THREE.Object3D) {
       const rehau_profile = rehau_group.children[0]
 
       for(const rehau_component of rehau_profile.children) {
         if(rehau_component instanceof THREE.Object3D) {
+        
+          if(rehau_component.name === "Corner" && (index == 1 || index == 3)) {
+            rehau_component.children[0].visible = false;
+            rehau_component.children[1].visible = false;
+          }
+          
           for(const mesh of rehau_component.children) {
             if(mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
               morphMeshes.push(mesh)
@@ -152,7 +161,35 @@ export async function unwrapChildren(window: THREE.Object3D) {
         }        
       }
     }
+
+    index++;
   }
 
   return morphMeshes
 }
+
+export async function provideProfileView() {
+
+  console.log("store.profileRef.value: ", store.profileRef.value)
+  
+  store.isLoading.value = true
+  
+  store.windowRef.value.children[1].visible = false;
+  store.windowRef.value.children[2].visible = false;
+  store.windowRef.value.children[3].visible = false;
+  
+  store.windowRef.value.children[4].scale.y /= 2
+  store.windowRef.value.children[4].scale.z /= 2
+  
+  store.windowRef.value.children[0].position.z += 23
+  store.windowRef.value.children[0].position.y += 23
+  
+  store.textMeshes.windowWidthText = false
+  store.textMeshes.windowHeightText = false
+
+  setTimeout(() => {
+    // Loading completed, set isLoading to false
+    store.isLoading.value = false
+  }, 1300) // Simulating a 3-second loading time, adjust as needed
+  
+} 

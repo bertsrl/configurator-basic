@@ -69,7 +69,7 @@ export function updateMeterX(window: THREE.Object3D) {
 
 export async function createText(units: number) {    
     //text mesh
-    const geometryText = new TextGeometry( `${units} cm`, {
+    const geometryText = new TextGeometry( `${units} m`, {
 		font: fontRef.value,
 		size: 20,
 		height: 5,

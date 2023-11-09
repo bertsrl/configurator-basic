@@ -1,6 +1,9 @@
 import * as THREE from 'three'
+import * as f from '@/components/Environment/functions'
+import * as store from '@/store'
 
 import { loadData } from './LoadData'
+import { toRaw } from 'vue'
 
 export const boundingBoxes = <THREE.Object3D[]>[]
 export const fillMeshes = <THREE.Object3D[]>[]
@@ -10,8 +13,8 @@ export async function computeRehauGroup() {
 
   console.log("Am fost invocat", boundingBoxes, fillMeshes, limitPoints)
   // ---------------- Rehau Group Start
-  const product = await loadData('./models/Dora/profile_extended_new_center.glb')
-  console.log(product)
+  const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
+  console.log("product: ", product)
 
   const box3 = new THREE.Box3().setFromObject(product[0])
 
@@ -37,6 +40,7 @@ export async function computeRehauGroup() {
     )
 
   product[0].add(boundingIntesect)
+  
 
   // Calculate the end point of the bounding box along the Y-axis
   const endZ = middlePoint.z + dimension.z / 6
@@ -79,9 +83,12 @@ export async function computeRehauGroup() {
 
 export async function computeProduct() {
     const product_group = new THREE.Group()
+
     const {...rehau_group} = await computeRehauGroup()
     product_group.add(rehau_group.group)
     gatherHelpers(rehau_group.group)
+
+    store.profileRef.value = toRaw(rehau_group.group)
 
     //Get the Rehau Group here
     for (let i=0; i<3; i++) {
@@ -110,6 +117,8 @@ export async function computeProduct() {
             }
         }
     }
+
+    
 
     return product_group
 }
