@@ -15,8 +15,8 @@ THREE.Cache.enabled = true
 
 onMounted(async () => {
   // Create an axis helper
-  const axisHelper = new THREE.AxesHelper(0.4)
-  f.addToScene(axisHelper)
+  // const axisHelper = new THREE.AxesHelper(0.4)
+  // f.addToScene(axisHelper)
 
   f.addToScene(settings.ambientLight)
   f.addToScene(settings.light)

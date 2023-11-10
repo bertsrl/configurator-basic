@@ -30,7 +30,6 @@ const props = withDefaults(
 
 async function addFrameAppendix(name: string, renderer: THREE.WebGLRenderer, camera: THREE.Camera) {
   const { maxTop, maxRight } = points.getMaxPoints(props.name)
-  console.log('Initial points array: ', points.points)
 
   if (props.name === 'Add Up') {
     points.points.splice(
@@ -56,7 +55,6 @@ async function addFrameAppendix(name: string, renderer: THREE.WebGLRenderer, cam
       new THREE.Vector3(maxRight.point2.x + 1, maxRight.point2.y, maxRight.point2.z)
     )
   }
-  console.log('points push: ', points.points)
 }
 </script>
 <style lang=""></style>

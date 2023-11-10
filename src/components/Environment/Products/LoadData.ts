@@ -17,7 +17,6 @@ async function loadFont(path: string) {
     
     const fontLoader = new FontLoader();
     const fontData = await fontLoader.loadAsync(path)
-    console.log("My font: ", fontData.data);
     
     return fontData;
 }

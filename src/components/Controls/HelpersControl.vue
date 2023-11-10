@@ -8,7 +8,6 @@
       label="Bounding Boxes"
       @click="
         () => {
-          console.log('boundingBoxesRef.value: ', toRaw(boundingBoxesRef))
           f.toggleHelpersFn(boundingBoxesRef, toggleBoundingBoxes)
           toggleBoundingBoxes = toggleBoundingBoxes === true ? false : true
         }
@@ -35,7 +34,6 @@
       label="Fill"
       @click="
         () => {
-          console.log('fillMEshesRef.value: ', fillMeshesRef.value)
           f.toggleHelpersFn(fillMeshesRef, toggleFill)
           toggleFill = toggleFill === true ? false : true
         }
@@ -64,7 +62,6 @@ const boundingBoxesRef = ref([])
 const fillMeshesRef = ref([])
 const limitPointsRef = ref([])
 
-console.log('limitPoints: ', limitPoints, 'boundingBoxes: ', boundingBoxes)
 // Debug
 const gui = new dat.GUI()
 

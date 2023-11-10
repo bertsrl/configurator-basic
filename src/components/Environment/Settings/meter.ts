@@ -50,7 +50,6 @@ export async function provideMeterY(meshHeigh: number, meshMiddle: THREE.Vector3
 
     store.textMeshes.windowHeightText = textMesh
 
-    console.log("store.textMeshes.windowHeightText: ", toRaw(store.textMeshes.windowHeightText))
     f.scene.add(toRaw(store.textMeshes.windowHeightText))
     
     return cube;
@@ -61,8 +60,6 @@ export function updateMeterX(window: THREE.Object3D) {
 
     const dimension = new THREE.Vector3()
     box3.getSize(dimension)
-
-    console.log(dimension)
 
     store.meters.x.scale.x = dimension.x / 2
 }

@@ -106,7 +106,7 @@
       <div style="height: 7.5vh">
         <img src="/360config_logo.png" style="position: relative; max-height: 75%; margin: 10px" />
       </div>
-      <helpers-control />
+      <!-- <helpers-control /> -->
     </div>
     <div id="content">
       <loading-screen v-if="store.isLoading.value === true" />
@@ -125,27 +125,39 @@
         <canvas id="canvas"></canvas>
       </div>
       <div class="settings" style="background-color: $secondary">
-        <div class="settings-container q-pa-md">
-          <h6>Customize Product</h6>
-        </div>
-        <div class="color-controls q-pa-md">
-          <h6>Color Controls</h6>
-          <!-- Create a color picker component -->
-          <color-control :options="colorOptions" v-model:color_value="hex" />
-          <p style="margin-top: 2vh">Selected color: {{ hex }}</p>
-        </div>
-        <div class="size-controls q-pa-md">
-          <h6>Size Controls</h6>
-          <size-control title="Width" v-model:size="changeWidth" />
-          <size-control title="Height" v-model:size="changeHeight" />
-        </div>
+        <q-scroll-area style="height: 750px; width: 100%">
+          <div v-if="!store.isProfileLook.value">
+            <div class="settings-container q-pa-md">
+              <h6>Customize Product</h6>
+            </div>
+            <div class="color-controls q-pa-md">
+              <h6>Color Controls</h6>
+              <!-- Create a color picker component -->
+              <color-control :options="colorOptions" v-model:color_value="hex" />
+              <p style="margin-top: 2vh">Selected color: {{ hex }}</p>
+            </div>
+            <div class="size-controls q-pa-md">
+              <h6>Size Controls</h6>
+
+              <size-control title="Width" class="col-12" type="width" v-model:size="changeWidth" />
+              <size-control
+                title="Height"
+                class="col-12"
+                type="height"
+                v-model:size="changeHeight"
+              />
+            </div>
+          </div>
+          <div v-else class="settings"><h6>No available options in Profile View</h6></div>
+        </q-scroll-area>
+        <!-- <div id="license" style="color: #000; font-size: 1vw: ">Powered by @bert.tech</div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUpdate, nextTick, computed } from 'vue'
+import { onMounted, onBeforeUpdate } from 'vue'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
 
@@ -169,7 +181,7 @@ import * as store from '@/store'
 import * as meter from '@/components/Environment/Settings'
 import LoadingScreen from '@/components/Environment/Init/LoadingScreen.vue'
 
-const hex = ref('green')
+const hex = ref('')
 const colorOptions = ref([
   { label: 'Red', value: 'red' },
   { label: 'Green', value: 'green' },
@@ -194,7 +206,6 @@ myPoints.value = points
 
 // Debug
 const gui = new dat.GUI()
-const scaleFolder = gui.addFolder('Scale')
 
 onMounted(async () => {
   store.isLoading.value = true
@@ -206,8 +217,6 @@ onMounted(async () => {
   product_group.rotation.y = Math.PI / 2
 
   f.scene.add(product_group)
-
-  console.log('product_group: ', product_group)
 
   const morphMeshes = await f.unwrapChildren(product_group)
   morphMeshesRef.value = morphMeshes
@@ -222,46 +231,13 @@ onMounted(async () => {
   const dimension = new THREE.Vector3()
   box3.getSize(dimension)
 
-  console.log('glass dimension: ', dimension)
-
-  console.log('glass: ', glass)
-
   glass.position.set(0, 0, 0)
-
-  const glassData = {
-    x: glass.scale.x,
-    y: glass.scale.y,
-    z: glass.scale.z
-  }
-  scaleFolder
-    .add(glassData, 'x', glass.scale.x, 10)
-    .step(0.01)
-    .name('mesh 0 scale z')
-    .onChange(() => {
-      glass.scale.x = glassData.x
-    })
-  scaleFolder
-    .add(glassData, 'y', glass.scale.y, 10)
-    .step(0.01)
-    .name('mesh 0 scale y')
-    .onChange(() => {
-      glass.scale.y = glassData.y
-    })
-  scaleFolder
-    .add(glassData, 'z', glass.scale.z, 10)
-    .step(0.01)
-    .name('mesh 0 scale z')
-    .onChange(() => {
-      glass.scale.z = glassData.z
-    })
 
   glass.scale.set(glass.scale.x, glass.scale.y * 2, glass.scale.z * 2)
 
   glassRef.mesh = glass
   glassRef.initalSize = new THREE.Vector3(glass.scale.x, glass.scale.y, glass.scale.z)
 
-  console.log(morphMeshes)
-  console.log('boundingBoxes: ', boundingBoxes)
   const data = {
     scale: 0,
     boxScale: 1
@@ -277,7 +253,6 @@ onMounted(async () => {
 
   // Canvas
   const canvas = document.getElementById('canvas')!
-  console.log(canvas)
 
   // Renderer
   const renderer = new THREE.WebGLRenderer({
@@ -300,41 +275,6 @@ onMounted(async () => {
   // Disable screen dragging if store.isDraggable is false
 
   controlsRef.value = controls
-
-  // controls.maxPolarAngle = Math.PI / 2
-
-  // // Set the minimum and maximum azimuthal angles
-  // controls.minAzimuthAngle = -Math.PI / 2 // Minimum azimuthal angle (in radians)
-  // controls.maxAzimuthAngle = Math.PI / 2 // Maximum azimuthal angle (in radians)
-
-  console.log(appendixButtons)
-
-  // for (const appendix of appendixButtons) {
-  //   f.addToScene(appendix.appendix)
-  //   // Calculate the average position of points at index 1 and index 2
-  //   const avgPosition = new THREE.Vector3()
-  //     .addVectors(appendix.point1, appendix.point2)
-  //     .multiplyScalar(0.5)
-
-  //   if (appendix.appendix instanceof THREE.Object3D) {
-  //     // Check if points have the same Y value
-  //     if (appendix.point1.y > 0 && appendix.point1.y === appendix.point2.y) {
-  //       // Adjust the position based on Y value
-  //       avgPosition.y += 0.5
-  //     } else if (appendix.point1.y < 0 && appendix.point1.y === appendix.point2.y)
-  //       avgPosition.y -= 0.5
-
-  //     // Check if points have the same X value
-  //     if (appendix.point1.x > 0 && appendix.point1.x === appendix.point2.x) {
-  //       // Adjust the position based on Y value
-  //       avgPosition.x += 0.5
-  //     } else if (appendix.point1.x < 0 && appendix.point1.x === appendix.point2.x)
-  //       avgPosition.x -= 0.5
-
-  //     appendix.appendix.position.copy(avgPosition)
-  //   }
-  // }
-
   tick()
 })
 
@@ -355,27 +295,55 @@ onBeforeUpdate(async () => {
   }, 1000) // Simulating a 3-second loading time, adjust as needed
 })
 
+watch(store.windowChange, (newValue) => {
+  if (newValue) {
+    store.isLoading.value = true
+
+    location.reload()
+
+    setTimeout(() => {
+      store.isLoading.value = false
+    }, 1300)
+  }
+})
+
 const widthChanging = ref(false)
 const heightChanging = ref(false)
 
 watchEffect(() => {
   if (store.isCameraswitchSelected.value) {
-    console.log('Camera Switch!')
     f.camera.position.set(0, 0, 11)
   }
 })
 
 watch(store.isProfileLook, (newVal) => {
   if (newVal) {
-    const profileGroupMiddle = new THREE.Vector3(
-      toRaw(store.windowRef.value.children[0].position.x) - 0.5,
-      toRaw(store.windowRef.value.children[0].position.y) - 0.5,
-      toRaw(store.windowRef.value.children[0].position.z)
+    f.camera.position.set(-3, 3, 0)
+
+    glassRef.mesh.scale.set(
+      toRaw(glassRef.initalSize.x),
+      toRaw(glassRef.initalSize.y),
+      toRaw(glassRef.initalSize.z)
     )
 
-    f.camera.lookAt(profileGroupMiddle)
+    for (const mesh of morphMeshesRef.value) {
+      if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+        mesh.morphTargetInfluences[0] = 0
+        mesh.morphTargetInfluences[1] = 0
+      }
+    }
 
     f.provideProfileView()
+  }
+})
+watch(store.isWindowLook, (newVal) => {
+  if (newVal) {
+    f.camera.position.set(0, 0, 11)
+
+    changeWidth.value = 0
+    changeHeight.value = 0
+
+    f.provideWindowView()
   }
 })
 
@@ -416,16 +384,12 @@ watch(changeWidth, (newVal, oldVal) => {
 
     const mappedWidth = 1 + changeWidth.value
 
-    console.log('boungingBoxes[0].width: ', boundingBoxes[0].scale.x, 'mappedWidth: ', mappedWidth)
     store.meters.x.scale.x = mappedWidth
     store.meters.y.position.x = store.windowRef.value.position.x + mappedWidth * 1.5
     store.textMeshes.windowHeightText.position.x = store.meters.y.position.x + 0.1
-    store.units.width = changeWidth.value //TODO: De asociat cu intervalul pe care il da user-ul ca min max warranty
 
     if (store.isMetricsEnabled.value)
       meter.createText(store.units.width).then((newTextMesh) => {
-        console.log(toRaw(store.textMeshes.windowWidthText))
-
         const oldText: THREE.Object3D = toRaw(store.textMeshes.windowWidthText)
 
         newTextMesh.position.copy(oldText.position)
@@ -478,21 +442,12 @@ watch(changeHeight, (newVal, oldVal) => {
 
     const mappedHeight = 1 + changeHeight.value
 
-    console.log(
-      'boungingBoxes[0].height: ',
-      boundingBoxes[0].scale.y,
-      'mappedHeight: ',
-      mappedHeight
-    )
     store.meters.y.scale.y = mappedHeight
     store.meters.x.position.y = store.windowRef.value.position.y + mappedHeight * 1.5
     store.textMeshes.windowWidthText.position.y = store.meters.x.position.y + 0.1
-    store.units.height = changeHeight.value //TODO: De asociat cu intervalul pe care il da user-ul ca min max warranty
 
     if (store.isMetricsEnabled.value)
       meter.createText(store.units.height).then((newTextMesh) => {
-        console.log('Running', toRaw(store.textMeshes.windowHeightText))
-
         const oldText: THREE.Object3D = toRaw(store.textMeshes.windowHeightText)
 
         newTextMesh.position.copy(oldText.position)

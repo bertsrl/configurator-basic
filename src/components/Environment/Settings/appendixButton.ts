@@ -13,8 +13,6 @@ for (const [index = 1, point] of points.slice(1).entries()) {
     const loader = new FontLoader();
     // Loading the JSON font file from CDN. Can be a file path too.
     const font = loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json', (font) => {
-
-        console.log("Your fucking font:", font)
         
         const radius = 2; // Adjust the radius as needed
         const segments = 32; // Number of segments for the circle
@@ -73,7 +71,4 @@ for (const [index = 1, point] of points.slice(1).entries()) {
     }
 
     appendix.scale.set(0.5, 0.5, 0.5);
-
-    // appendixButtons.push({appendix , point1: points[index] , point2: points[index+1], itsHovered: true});
-    console.log("appendixButtons ", appendixButtons)
 }

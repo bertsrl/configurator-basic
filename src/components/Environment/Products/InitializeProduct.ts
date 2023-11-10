@@ -11,17 +11,13 @@ export const limitPoints = <THREE.Object3D[]>[]
 
 export async function computeRehauGroup() {
 
-  console.log("Am fost invocat", boundingBoxes, fillMeshes, limitPoints)
   // ---------------- Rehau Group Start
   const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
-  console.log("product: ", product)
 
   const box3 = new THREE.Box3().setFromObject(product[0])
 
   const dimension = new THREE.Vector3()
   box3.getSize(dimension)
-
-  console.log("dimension: ", dimension)
 
   const boundingIntesect = new THREE.Mesh(
       new THREE.BoxGeometry(dimension.x, dimension.y, dimension.z),
@@ -40,15 +36,15 @@ export async function computeRehauGroup() {
     )
 
   product[0].add(boundingIntesect)
-  
 
+  boundingIntesect.visible = false
+  
   // Calculate the end point of the bounding box along the Y-axis
   const endZ = middlePoint.z + dimension.z / 6
   const endY = middlePoint.y + dimension.y / 6.05
   const startY = middlePoint.y - dimension.y / 6
   const startZ = middlePoint.z - dimension.z / 6
-  
-  console.log("rehau group z size: ", endZ - startZ)
+
   
   // Create a red point light at the middle point
   const sphere = new THREE.SphereGeometry( 0.5, 16, 8 );
@@ -147,7 +143,6 @@ type Rehau = {
 }
 
 function gatherHelpers(group: THREE.Group) {
-    console.log(group)
     for(const child of group.children) {
         if(child instanceof THREE.Object3D) {
             if (child.name === "Rehau") fillMeshes.push(child)

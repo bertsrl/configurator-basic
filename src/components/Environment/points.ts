@@ -18,7 +18,6 @@ export function getMaxPoints(direction: string) {
     point2: new THREE.Vector3()
   }
   
-  console.log(direction)
   for (const point of points) {
     if(direction === "Add Up") {
       
@@ -45,8 +44,6 @@ export function getMaxPoints(direction: string) {
       }
     }
   }
-
-  console.log("maxTop: ", maxTop, "maxRight: ", maxRight)
 
   return {
     maxTop,

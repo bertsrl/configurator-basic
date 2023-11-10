@@ -13,8 +13,6 @@ function provideVertexTag(index?: number) {
     // Loading the JSON font file from CDN. Can be a file path too.
     const font = loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json', (font) => {
 
-        console.log("Your fucking font:", font)
-        
         const radius = 2; // Adjust the radius as needed
         const segments = 32; // Number of segments for the circle
     

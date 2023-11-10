@@ -68,5 +68,7 @@ function changePlasticColor(color: string) {
         }
     }
   }
+
+  selectedColor.value = color
 }
 </script>

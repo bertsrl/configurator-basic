@@ -73,11 +73,8 @@ export function addToScene(element?: THREE.Object3D | THREE.Object3D[]) {
 }
 
 export function toggleHelpersFn(array: THREE.Object3D[], itsToggle: boolean) {    
-    console.log(itsToggle, " boolean")
     const elements = toRaw(array)
-    console.log("Array: ", elements)
     for(const el of elements) {
-        console.log(el)
         if(el instanceof THREE.Object3D) {
           if(itsToggle === true) {
             el.visible = false;
@@ -86,8 +83,6 @@ export function toggleHelpersFn(array: THREE.Object3D[], itsToggle: boolean) {
           }
         }
       }
-      
-    console.log(itsToggle)
   }
 
 export async function addDummy() {
@@ -95,7 +90,6 @@ export async function addDummy() {
 
     const productMesh = product.filter((a) => a && a.name)
   
-    console.log("Profil: ", productMesh)
     for (const mesh of productMesh) {
       if (mesh instanceof THREE.Object3D) {
         // for(const child of mesh.children) {
@@ -116,14 +110,12 @@ export async function addDummy() {
 
 export async function unwrapChildren(window: THREE.Object3D) {
   const morphMeshes = []
-  console.log("window: ", window)
   
   const box3 = new THREE.Box3().setFromObject(window)
 
   const dimension = new THREE.Vector3()
   box3.getSize(dimension)
   
-  console.log("window dimension: ",dimension)
 
   window.position.set(0, 0, 0)
   
@@ -136,7 +128,6 @@ export async function unwrapChildren(window: THREE.Object3D) {
   store.meters.x = meterX
   store.meters.y = meterY
 
-  console.log("store.meters: ", store.meters.x, store.meters.y)
   store.windowRef.value = window 
 
   let index = 0;
@@ -169,8 +160,6 @@ export async function unwrapChildren(window: THREE.Object3D) {
 }
 
 export async function provideProfileView() {
-
-  console.log("store.profileRef.value: ", store.profileRef.value)
   
   store.isLoading.value = true
   
@@ -184,8 +173,29 @@ export async function provideProfileView() {
   store.windowRef.value.children[0].position.z += 23
   store.windowRef.value.children[0].position.y += 23
   
-  store.textMeshes.windowWidthText = false
-  store.textMeshes.windowHeightText = false
+  store.isMetricsEnabled.value = false
+
+  setTimeout(() => {
+    // Loading completed, set isLoading to false
+    store.isLoading.value = false
+  }, 1300) // Simulating a 3-second loading time, adjust as needed
+  
+} 
+export async function provideWindowView() {
+  
+  store.isLoading.value = true
+  
+  store.windowRef.value.children[1].visible = true;
+  store.windowRef.value.children[2].visible = true;
+  store.windowRef.value.children[3].visible = true;
+  
+  store.windowRef.value.children[4].scale.y *= 2
+  store.windowRef.value.children[4].scale.z *= 2
+  
+  store.windowRef.value.children[0].position.z -= 23
+  store.windowRef.value.children[0].position.y -= 23
+  
+  store.isMetricsEnabled.value = true
 
   setTimeout(() => {
     // Loading completed, set isLoading to false
