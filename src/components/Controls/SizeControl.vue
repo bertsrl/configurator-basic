@@ -36,7 +36,7 @@
             v-model="minW"
             label="Min Value"
             stack-label
-            :rules="[validateMinSize]"
+            :rules="[validateMinW]"
           />
           <q-input
             class="col-5 q-mx-sm"
@@ -45,7 +45,7 @@
             v-model="maxW"
             label="Max Value"
             stack-label
-            :rules="[validateMaxSize]"
+            :rules="[validateMaxW]"
           />
         </div>
       </div>
@@ -124,6 +124,14 @@ function validateMinSize(value: number) {
 }
 function validateMaxSize(value: number) {
   const isValid = !isNaN(value) && isFinite(value) && value > minSize.value
+  return isValid || 'INVALID DATA'
+}
+function validateMinW(value: number) {
+  const isValid = !isNaN(value) && isFinite(value) && value < maxW.value
+  return isValid || 'INVALID DATA'
+}
+function validateMaxW(value: number) {
+  const isValid = !isNaN(value) && isFinite(value) && value > minW.value
   return isValid || 'INVALID DATA'
 }
 
