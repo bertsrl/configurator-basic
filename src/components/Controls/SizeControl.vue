@@ -2,12 +2,12 @@
   <div class="control-width q-pa-md">
     <div class="row justify-center q-mb-sm">
       <p class="text-h5 col-12">{{ title }}</p>
-      <div class="col-6">
+      <div :class="{ 'col-6': $q.screen.width === 1200, 'col-12': $q.screen.width === 600 }">
         <div class="row"></div>
         <p class="col-3 q-pl-sm">Window limits</p>
         <div class="row">
           <q-input
-            class="col-5 q-mx-sm"
+            class="col-5 q-mx-sm no-arrows-input"
             filled
             type="number"
             v-model="minSize"
@@ -16,7 +16,7 @@
             :rules="[validateMinSize]"
           />
           <q-input
-            class="col-5 q-mx-sm"
+            class="col-5 q-mx-sm no-arrows-input"
             filled
             type="number"
             v-model="maxSize"
@@ -26,32 +26,32 @@
           />
         </div>
       </div>
-      <div class="col-6">
+      <div :class="{ 'col-6': $q.screen.width === 1200, 'col-12': $q.screen.width === 600 }">
         <p class="col-3 q-pl-sm">Warranty limits</p>
         <div class="row">
           <q-input
-            class="col-5 q-mx-sm"
+            class="col-5 q-mx-sm no-arrows-input"
             filled
             type="number"
             v-model="minW"
             label="Min Value"
             stack-label
-            :rules="[validateMinW]"
+            no-parent-field
           />
           <q-input
-            class="col-5 q-mx-sm"
+            class="col-5 q-mx-sm no-arrows-input"
             filled
             type="number"
             v-model="maxW"
             label="Max Value"
             stack-label
-            :rules="[validateMaxW]"
+            no-parent-field
           />
         </div>
       </div>
     </div>
     <q-input
-      class="q-mx-sm"
+      class="q-mx-sm no-arrows-input"
       filled
       type="number"
       v-model="mappedValue1030"
@@ -119,19 +119,16 @@ function checkWarranty() {
 }
 
 function validateMinSize(value: number) {
-  const isValid = !isNaN(value) && isFinite(value) && value < maxSize.value
-  return isValid || 'INVALID DATA'
+  const isValid = computed(() => {
+    const verdict = value < maxSize.value ? true : false
+    return verdict
+  })
+
+  if (isValid.value) return isValid.value
+  return 'INVALID DATA'
 }
 function validateMaxSize(value: number) {
-  const isValid = !isNaN(value) && isFinite(value) && value > minSize.value
-  return isValid || 'INVALID DATA'
-}
-function validateMinW(value: number) {
-  const isValid = !isNaN(value) && isFinite(value) && value < maxW.value
-  return isValid || 'INVALID DATA'
-}
-function validateMaxW(value: number) {
-  const isValid = !isNaN(value) && isFinite(value) && value > minW.value
+  const isValid = !isNaN(value) && value > minSize.value
   return isValid || 'INVALID DATA'
 }
 
@@ -165,4 +162,9 @@ watch(mappedValue01, (newVal) => {
   size.value = newVal
 })
 </script>
-<style></style>
+<style>
+.no-arrows-input input[type='number'] {
+  -webkit-appearance: textfield;
+  margin: 0;
+}
+</style>
