@@ -70,10 +70,10 @@
   }
 
   #content {
-    grid-area: content;
-    display: grid;
-    grid-template-columns: 70% 30%;
-    grid-template-areas: 'canvas settings';
+    // grid-area: content;
+    // display: grid;
+    // grid-template-columns: 70% 30%;
+    // grid-template-areas: 'canvas settings';
     width: 100%;
   }
 
@@ -92,7 +92,110 @@
 </style>
 
 <template>
-  <div class="container">
+  <div class="container" ref="main">
+    <q-btn style="position: absolute; top: 10vh; left: 10vw" @click="toggleTimeline"
+      >Test Transition</q-btn
+    >
+    <configure-panel class="card-transition" :config-panel-id="currentConfigPanelId" />
+    <!-- <q-card
+      class="q-pa-md rounded-borders card-transition"
+      style="width: 32vw; position: absolute; top: 10vh; right: -40%; z-index: 999"
+      flat
+      bordered
+    >
+      <q-card-section>
+        <div class="text-h6">Test Transition</div>
+        <div class="text-subtitle2">Test Transition</div>
+      </q-card-section>
+    </q-card> -->
+    <div
+      class="q-pa-md rounded-borders card-transition"
+      :class="store.showCard2.value ? 'card-leave-to' : ''"
+      style="width: 35vw; position: absolute; top: 10vh; right: 5vw"
+    >
+      <q-card class="my-card" id="control-card" flat bordered>
+        <q-card-section>
+          <div class="text-h6">Our Changing Planet</div>
+          <div class="text-subtitle2">by John Doe</div>
+        </q-card-section>
+
+        <q-tabs v-model="tab" class="text-teal">
+          <q-tab label="Size Controls" name="one" />
+          <q-tab label="Color" name="two" />
+        </q-tabs>
+
+        <q-separator />
+
+        <q-tab-panels v-model="tab" style="height: 65vh">
+          <q-tab-panel name="one">
+            <div style="height: 750px; width: 100%">
+              <div v-if="!store.isProfileLook.value">
+                <div class="settings-container q-pa-md">
+                  <h6>Customize Product</h6>
+                </div>
+                <div class="color-controls q-pa-md">
+                  <h6>Color Controls</h6>
+                  <color-control :options="colorOptions" v-model:color_value="hex" />
+                  <p style="margin-top: 2vh">Selected color: {{ hex }}</p>
+                </div>
+                <div class="size-controls q-pa-md row">
+                  <div class="controls-iter">
+                    <div class="text-h6 col-6">Size Controls</div>
+                    <div class="q-py-md text-h6">Width</div>
+                    <q-btn
+                      @click="
+                        () => {
+                          toggleTimeline()
+                          currentConfigPanelId = 0
+                        }
+                      "
+                    >
+                      Configure Limits
+                    </q-btn>
+                    <size-inputs :controlId="0" />
+                    <slider-component v-model:size-prop="changeWidth" :controlId="0" />
+
+                    <div class="q-py-md text-h6">Height</div>
+                    <q-btn
+                      @click="
+                        () => {
+                          toggleTimeline()
+                          currentConfigPanelId = 1
+                        }
+                      "
+                    >
+                      Configure Limits
+                    </q-btn>
+                    <size-inputs :controlId="1" />
+                    <slider-component v-model:size-prop="changeHeight" :controlId="1" />
+                  </div>
+                  <!-- 
+                  <size-control
+                    title="Width"
+                    class="col-12"
+                    type="width"
+                    v-model:size="changeWidth"
+                  />
+                  <size-control
+                    title="Height"
+                    class="col-12"
+                    type="height"
+                    v-model:size="changeHeight"
+                  /> -->
+                </div>
+              </div>
+              <div v-else class="settings"><h6>No available options in Profile View</h6></div>
+            </div>
+          </q-tab-panel>
+
+          <q-tab-panel name="two">
+            With so much content to display at once, and often so little screen real-estate, Cards
+            have fast become the design pattern of choice for many companies, including the likes of
+            Google and Twitter.
+          </q-tab-panel>
+        </q-tab-panels>
+      </q-card>
+    </div>
     <div
       class="navigation"
       style="
@@ -124,7 +227,7 @@
         <scene-controller />
         <canvas id="canvas"></canvas>
       </div>
-      <div class="settings" style="background-color: $secondary">
+      <!-- <div class="settings" style="background-color: $secondary">
         <q-scroll-area style="height: 750px; width: 100%">
           <div v-if="!store.isProfileLook.value">
             <div class="settings-container q-pa-md">
@@ -132,7 +235,6 @@
             </div>
             <div class="color-controls q-pa-md">
               <h6>Color Controls</h6>
-              <!-- Create a color picker component -->
               <color-control :options="colorOptions" v-model:color_value="hex" />
               <p style="margin-top: 2vh">Selected color: {{ hex }}</p>
             </div>
@@ -150,8 +252,8 @@
           </div>
           <div v-else class="settings"><h6>No available options in Profile View</h6></div>
         </q-scroll-area>
-        <!-- <div id="license" style="color: #000; font-size: 1vw: ">Powered by @bert.tech</div> -->
-      </div>
+        <div id="license" style="color: #000; font-size: 1vw: ">Powered by @bert.tech</div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -161,14 +263,14 @@ import { onMounted, onBeforeUpdate } from 'vue'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
 
-import { ref, reactive, toRaw, watch, watchEffect } from 'vue'
+import { ref, reactive, toRaw, watch, watchEffect, computed } from 'vue'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as f from '@/components/Environment/functions'
 import * as vTag from '@/components/Environment/vertexTag'
 import * as settings from '@/components/Environment/Settings/'
 import { loadData } from '@/components/Environment/Products/LoadData'
-import SizeControl from '@/components/Controls/SizeControl.vue'
+import SizeControl from '@/components/Controls/SizeControl/SizeInputs.vue'
 import ColorControl from '@/components/Controls/ColorControl.vue'
 import { points } from '@/components/Environment/points'
 import ToolsControl from '@/components/Controls/ToolsControl.vue'
@@ -180,6 +282,19 @@ import { computeProduct, boundingBoxes } from '@/components/Environment/Products
 import * as store from '@/store'
 import * as meter from '@/components/Environment/Settings'
 import LoadingScreen from '@/components/Environment/Init/LoadingScreen.vue'
+import ConfigurePanel from './ConfigurePanel.vue'
+
+import SizeInputs from '@/components/Controls/SizeControl/SizeInputs.vue'
+import SliderComponent from '@/components/Controls/SizeControl/SliderComponent.vue'
+
+const minSize = ref(0)
+const maxSize = ref(30)
+const minW = ref(0)
+const maxW = ref(20)
+const mappedValue1030 = ref()
+const mappedValue01 = ref()
+
+const currentConfigPanelId = ref(1)
 
 const hex = ref('')
 const colorOptions = ref([
@@ -204,10 +319,130 @@ const controlsRef = ref()
 const myPoints = ref()
 myPoints.value = points
 
+const tab = ref('one')
+
 // Debug
 const gui = new dat.GUI()
 
+// Variables for mouse drag
+let isDragging = false
+let isOnScene = true
+let previousMousePosition = {
+  x: 0,
+  y: 0
+}
+
+// Function to handle mouse down event
+function onMouseDown(event) {
+  isDragging = true
+  previousMousePosition = {
+    x: event.clientX,
+    y: event.clientY
+  }
+}
+
+// Function to handle mouse move event
+function onMouseMove(event) {
+  if (!isDragging) return
+
+  const deltaMove = {
+    x: event.clientX - previousMousePosition.x,
+    y: event.clientY - previousMousePosition.y
+  }
+
+  // Rotate the cube based on mouse movement
+  store.windowRef.value.rotation.y += deltaMove.x * 0.01
+  store.windowRef.value.rotation.x += deltaMove.y * 0.01
+
+  previousMousePosition = {
+    x: event.clientX,
+    y: event.clientY
+  }
+}
+
+// Function to handle mouse up event
+function onMouseUp() {
+  isDragging = false
+}
+
+const limits = {
+  minWindowZ: 0,
+  maxWindowZ: 0,
+  minWindowX: 0,
+  maxWindowX: 0
+}
+
+function onMouseWheel(event) {
+  if (isOnScene) {
+    // Assuming limits.min and limits.max are defined
+    const minWindowZ = limits.minWindowZ
+    const maxWindowZ = limits.maxWindowZ
+    const minWindowX = limits.minWindowX
+    const maxWindowX = limits.maxWindowX
+
+    store.windowRef.value.position.z += event.detail * 0.01
+
+    // Ensure the position.z stays within the limits
+    if (store.windowRef.value.position.z < minWindowZ) {
+      store.windowRef.value.position.z = minWindowZ
+    } else if (store.windowRef.value.position.z > maxWindowZ) {
+      store.windowRef.value.position.z = maxWindowZ
+    }
+
+    // Ensure the position.z stays within the limits
+    if (store.windowRef.value.position.x < minWindowX) {
+      store.windowRef.value.position.x = minWindowX
+    } else if (store.windowRef.value.position.z > maxWindowX) {
+      store.windowRef.value.position.x = maxWindowX
+    }
+    // Adjust position.x based on event.detail
+    store.windowRef.value.position.x += event.detail * 0.0001
+  }
+}
+
+const main = ref()
+let tl
+let ctx
+import gsap from 'gsap'
+import type { Control } from '@/types'
+import { matRemoveShoppingCart } from '@quasar/extras/material-icons'
+
+function toggleTimeline() {
+  tl.reversed(!tl.reversed())
+}
+
 onMounted(async () => {
+  console.log(store.controlsArray)
+  ctx = gsap.context((self) => {
+    const cards = self.selector('.card-transition')
+    console.log(cards)
+    tl = gsap.timeline().to(cards[1], { xPercent: 150 }).to(cards[0], { xPercent: -200 }).reverse()
+  }, main.value) // <- Scope!
+
+  // Add event listeners
+  document.addEventListener('mousedown', onMouseDown, false)
+  document.addEventListener('mousemove', onMouseMove, false)
+  document.addEventListener('mouseup', onMouseUp, false)
+  document.addEventListener('mousewheel', onMouseWheel, false)
+  document.addEventListener('MozMousePixelScroll', onMouseWheel, false)
+
+  const my_card = document.getElementById('control-card')
+
+  my_card!.addEventListener(
+    'mouseenter',
+    () => {
+      isOnScene = false
+    },
+    false
+  )
+  my_card!.addEventListener(
+    'mouseleave',
+    () => {
+      isOnScene = true
+    },
+    false
+  )
+
   store.isLoading.value = true
 
   const product_group = await computeProduct()
@@ -225,6 +460,11 @@ onMounted(async () => {
 
   const glass = product[1]
   store.windowRef.value.add(toRaw(glass)) //TODO: De corectat chestia asta pentru ca provoaca probleme. Spre exemplu in ColorControl.vue trebuie sa adaug un if(... !== undefined)
+
+  limits.maxWindowZ = store.windowRef.value.position.z + 4
+  limits.minWindowZ = store.windowRef.value.position.z - 4
+  limits.maxWindowX = store.windowRef.value.position.x + 0.01
+  limits.minWindowX = store.windowRef.value.position.x - 0.01
 
   const box3 = new THREE.Box3().setFromObject(glass)
 
@@ -269,18 +509,18 @@ onMounted(async () => {
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap // default THREE.PCFShadowMap
 
-  // Controls
-  const controls = new OrbitControls(f.camera, canvas)
-  controls.enableDamping = true
-  // Disable screen dragging if store.isDraggable is false
+  // // Controls
+  // const controls = new OrbitControls(f.camera, canvas)
+  // controls.enableDamping = true
+  // // Disable screen dragging if store.isDraggable is false
 
-  controlsRef.value = controls
+  // controlsRef.value = controls
   tick()
 })
 
 function tick() {
   //Update controls
-  if (store.isDraggable.value) controlsRef.value.update()
+  // if (store.isDraggable.value) controlsRef.value.update()
 
   // Render
   rendererRef.value.render(f.scene, f.camera)
@@ -360,7 +600,9 @@ watch(store.isMetricsEnabled, (newVal) => {
     store.meters.y.visible = false
   }
 })
+
 watch(changeWidth, (newVal, oldVal) => {
+  console.log('BAAA Experience', changeWidth)
   if (newVal !== oldVal && !heightChanging.value) {
     widthChanging.value = true
 

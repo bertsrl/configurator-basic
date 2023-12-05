@@ -108,6 +108,28 @@ export async function addDummy() {
     return productMesh
 } 
 
+export function addKeepOffset(parentObject: THREE.Object3D, childObject: THREE.Object3D) {
+   // Assuming 'parentObject' is the target THREE.Object3D
+  // and 'childObject' is the object you want to add
+
+  // Step 1: Get the World Position and Rotation
+  const worldPosition = new THREE.Vector3();
+  const worldQuaternion = new THREE.Quaternion();
+  const worldScale = new THREE.Vector3();
+
+  childObject.getWorldPosition(worldPosition);
+  childObject.getWorldQuaternion(worldQuaternion);
+  childObject.getWorldScale(worldScale);
+
+  // Step 2: Add the Object as a Child
+  parentObject.add(childObject);
+
+  // Step 3: Set the World Position and Rotation
+  childObject.position.copy(worldPosition);
+  childObject.quaternion.copy(worldQuaternion);
+  childObject.scale.copy(worldScale);
+}
+
 export async function unwrapChildren(window: THREE.Object3D) {
   const morphMeshes = []
   
@@ -117,7 +139,7 @@ export async function unwrapChildren(window: THREE.Object3D) {
   box3.getSize(dimension)
   
 
-  window.position.set(0, 0, 0)
+  window.position.set(-2.7, 0, 0)
   
   const meterX = await settings.provideMeterX(dimension.x / 2, window.position) 
   const meterY = await settings.provideMeterY(dimension.y / 2, window.position) 
@@ -127,9 +149,10 @@ export async function unwrapChildren(window: THREE.Object3D) {
   
   store.meters.x = meterX
   store.meters.y = meterY
-
+  
+  console.log("window: ", window)
   store.windowRef.value = window 
-
+  
   let index = 0;
   
   for(const rehau_group of window.children) {
@@ -152,7 +175,8 @@ export async function unwrapChildren(window: THREE.Object3D) {
         }        
       }
     }
-
+    
+    if(index===3) break;
     index++;
   }
 

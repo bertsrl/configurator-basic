@@ -1,6 +1,7 @@
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 
 import { defineStore } from 'pinia'
+import {type Control } from "@/types"
 
 export const isLoading = ref(false)
 export const isDraggable = ref(true)
@@ -43,6 +44,26 @@ export function resetValues() {
 export const mappedValues = reactive({
   width: ref(0),
   height: ref(0)
+})
+
+export const showCard1 = ref(true)
+export const showCard2 = ref(false)
+
+export function toggleCards() {
+  showCard1.value = !showCard1.value
+  showCard2.value = !showCard2.value
+  console.log(showCard1.value, showCard2.value)
+}
+
+export const controlsArray = reactive(<Control[]>[
+  { id: 0, name: 'Width', minSize: ref(0), maxSize: 30, minW: 0, maxW: 20, mappedValue1030: ref(0), mappedValue01: 0 }, 
+  { id: 1, name: 'Height', minSize: ref(0), maxSize: 61, minW: 0, maxW: 100, mappedValue1030: ref(0), mappedValue01: 0 }
+])
+
+watch(controlsArray[0], (newVal) => {
+  if (newVal.maxSize) {
+    console.log(newVal)
+  }
 })
 
 export const useCounterStore = defineStore('counter', {

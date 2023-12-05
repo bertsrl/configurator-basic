@@ -29,7 +29,7 @@ onMounted(async () => {
   // f.scene.fog = new THREE.Fog(0xdedede, 1, 5)
 
   //Camera
-  f.camera.position.set(0, 0, 11)
+  f.camera.position.set(0, 0, 22)
 
   f.addToScene(f.camera)
 })

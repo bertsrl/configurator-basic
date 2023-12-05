@@ -8,6 +8,13 @@
         </q-item-section>
       </q-item>
 
+      <q-item clickable v-ripple>
+        <q-item-section>
+          <q-icon size="42px" color="primary" name="" />
+          <q-item-label>Drag</q-item-label>
+        </q-item-section>
+      </q-item>
+
       <q-item
         clickable
         v-ripple
