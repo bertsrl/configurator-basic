@@ -586,6 +586,7 @@ import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 import { useQuasar } from 'quasar'
 import { toneMapping } from 'three/examples/jsm/nodes/Nodes.js'
+import { setMapStoreSuffix } from 'pinia'
 
 watch(store.loggerText, (newVal, preVal) => {
   if (newVal) {
@@ -727,27 +728,28 @@ watch(store.isProfileLook, (newVal) => {
 })
 
 watch(store.isSphereLook, (newVal) => {
+  const meterYInitialPos = new THREE.Vector3()
+  const windowWorldScale = new THREE.Vector3()
+
   if (newVal === true) {
     controlsRef.value.enabled = true
 
     console.log('Sphere View!')
     gsap.to(store.windowRef.value.position, {
-      x: 0
+      x: 0,
+      onUpdate: () => {
+        store.meters.y.position.x = store.windowRef.value.position.x + (1 + changeWidth.value) * 1.5
+        store.textMeshes.windowHeightText.position.x =
+          store.windowRef.value.position.x + (1 + changeWidth.value) + 1.2
+      }
     })
 
     gsap.to(store.meters.x.position, {
       x: 0
     })
-    gsap.to(store.meters.y.position, {
-      x: store.windowRef.value.position.x + 4.2
-    })
 
     gsap.to(store.textMeshes.windowWidthText.position, {
       x: 0
-    })
-
-    gsap.to(store.textMeshes.windowHeightText.position, {
-      x: store.meters.y.position.x + 2.85
     })
 
     anime({
@@ -772,10 +774,6 @@ watch(store.isSphereLook, (newVal) => {
       }
     })
 
-    gsap.to(store.meters.y.position, {
-      x: store.cameraFrontPosition.position.x - 1.2
-    })
-
     gsap.to(store.meters.x.position, {
       x: store.cameraFrontPosition.position.x - 2.7
     })
@@ -794,7 +792,11 @@ watch(store.isSphereLook, (newVal) => {
     })
 
     gsap.to(store.windowRef.value.position, {
-      x: -2.7
+      x: -2.7,
+      onUpdate: () => {
+        store.meters.y.position.x = store.windowRef.value.position.x + (1 + changeWidth.value) * 1.5
+        store.textMeshes.windowHeightText.position.x = store.meters.y.position.x + 0.1
+      }
     })
   }
 })
