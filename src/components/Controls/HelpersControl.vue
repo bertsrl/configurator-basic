@@ -52,7 +52,6 @@ import {
   computeProduct
 } from '../Environment/Products/InitializeProduct'
 import { productRefMorphMeshes } from '@/store'
-import * as dat from 'lil-gui'
 
 const toggleBoundingBoxes = ref(true)
 const toggleLimitPoints = ref(true)
@@ -63,7 +62,6 @@ const fillMeshesRef = ref([])
 const limitPointsRef = ref([])
 
 // Debug
-const gui = new dat.GUI()
 
 onMounted(async () => {
   boundingBoxesRef.value = boundingBoxes

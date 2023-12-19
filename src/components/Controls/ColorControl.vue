@@ -13,12 +13,13 @@
 </style>
 
 <template>
-  <q-btn-toggle v-model="selectedColor" toggle-color="positive" class="picker" flat :options="[]">
+  <table-view />
+  <!-- <q-btn-toggle v-model="selectedColor" toggle-color="positive" class="picker" flat :options="[]">
     <div v-for="option in props.options" :key="option.value">
       <q-btn :color="option.value" @click="changePlasticColor(option.value)" />
       <p>{{ option.label }}</p>
     </div>
-  </q-btn-toggle>
+  </q-btn-toggle> -->
 </template>
 <script setup lang="ts">
 const props = withDefaults(
@@ -34,6 +35,7 @@ const props = withDefaults(
 import { ref, computed, toRaw } from 'vue'
 import * as THREE from 'three'
 import * as store from '@/store'
+import TableView from './TableView.vue'
 
 const emit = defineEmits(['update:color_value'])
 

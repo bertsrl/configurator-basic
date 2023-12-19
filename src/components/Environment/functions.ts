@@ -3,6 +3,7 @@ import * as dat from 'lil-gui'
 import * as settings from './Settings/'
 import * as store from '@/store'
 
+import { gsap } from "gsap"
 import { loadData } from "./Products/LoadData"
 import { toRaw } from 'vue'
 
@@ -12,7 +13,6 @@ export const sizes = {
     height: window.innerHeight
 }
 
-const gui = new dat.GUI();
 
 export const scene = new THREE.Scene();
 
@@ -130,6 +130,8 @@ export function addKeepOffset(parentObject: THREE.Object3D, childObject: THREE.O
   childObject.scale.copy(worldScale);
 }
 
+const profileMiddle = new THREE.Vector3()
+
 export async function unwrapChildren(window: THREE.Object3D) {
   const morphMeshes = []
   
@@ -138,14 +140,52 @@ export async function unwrapChildren(window: THREE.Object3D) {
   const dimension = new THREE.Vector3()
   box3.getSize(dimension)
   
-
   window.position.set(-2.7, 0, 0)
+
+
+  // const geometry = new THREE.SphereGeometry(1, 32, 16)
+  // const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+  // const sphere = new THREE.Mesh(geometry, material)
+  // window.children[0].add(sphere)
+
+  // sphere.position.z -= 25
+  // sphere.position.y -= 25
+
+  // sphere.getWorldPosition(profileMiddle)
+
+
+  
+
   
   const meterX = await settings.provideMeterX(dimension.x / 2, window.position) 
   const meterY = await settings.provideMeterY(dimension.y / 2, window.position) 
 
   scene.add(meterX)
   scene.add(meterY)
+  
+  // window.add(meterX, meterY)
+  // window.add(toRaw(store.textMeshes.windowHeightText), toRaw(store.textMeshes.windowWidthText))
+
+  // store.textMeshes.windowHeightText.scale.set(0.35, 0.35, 0.35)
+  // store.textMeshes.windowWidthText.scale.set(0.35, 0.35, 0.35)
+
+  // store.textMeshes.windowHeightText.rotation.y -= Math.PI / 2
+  // store.textMeshes.windowWidthText.rotation.y -= Math.PI / 2
+
+  // store.textMeshes.windowHeightText.position.y += 70
+  // store.textMeshes.windowWidthText.position.z += 70
+
+  // console.log("Window: ", window)
+  
+  // meterX.scale.set(40, 50, 50)
+  // meterY.scale.set(50, 40, 50)
+
+  // meterX.position.z += 62
+  // meterY.position.y += 62
+
+  // meterX.rotation.y += Math.PI / 2
+  // meterX.rotation.z += Math.PI / 2
+  // meterY.rotation.x += Math.PI / 2
   
   store.meters.x = meterX
   store.meters.y = meterY
@@ -154,6 +194,15 @@ export async function unwrapChildren(window: THREE.Object3D) {
   store.windowRef.value = window 
   
   let index = 0;
+
+  const params = {
+    envMap: 'HDR',
+    roughness: 0.4,
+    metalness: 0.6,
+    reflectivity: 1,
+    exposure: 1.0,
+    debug: false
+  };
   
   for(const rehau_group of window.children) {
     if(rehau_group instanceof THREE.Object3D) {
@@ -161,7 +210,7 @@ export async function unwrapChildren(window: THREE.Object3D) {
 
       for(const rehau_component of rehau_profile.children) {
         if(rehau_component instanceof THREE.Object3D) {
-        
+      
           if(rehau_component.name === "Corner" && (index == 1 || index == 3)) {
             rehau_component.children[0].visible = false;
             rehau_component.children[1].visible = false;
@@ -185,20 +234,38 @@ export async function unwrapChildren(window: THREE.Object3D) {
 
 export async function provideProfileView() {
   
-  store.isLoading.value = true
+  // store.isLoading.value = true
+  
+  // store.windowRef.value.children[0].children[0].children[1].visible = false
+  // store.windowRef.value.children[0].children[0].children[2].visible = false
   
   store.windowRef.value.children[1].visible = false;
   store.windowRef.value.children[2].visible = false;
   store.windowRef.value.children[3].visible = false;
+
+  console.log(store.windowRef.value)
   
   store.windowRef.value.children[4].scale.y /= 2
   store.windowRef.value.children[4].scale.z /= 2
   
-  store.windowRef.value.children[0].position.z += 23
-  store.windowRef.value.children[0].position.y += 23
+  store.windowRef.value.children[4].position.y -= 22.8 
+  store.windowRef.value.children[4].position.z -= 22.5
+
+  // store.windowRef.value.children[4].scale.x -= 0.1
+
+  // console.log("Profile: ", toRaw(store.windowRef.value))
+  
+  // store.windowRef.value.children[0].position.y += 22.8
+  // store.windowRef.value.children[0].position.z += 22.5
+  // store.windowRef.value.children[0].position.x += 0.1
+  
+  // store.windowRef.value.children[0].position.z += 23
+  // store.windowRef.value.children[0].position.y += 23
   
   store.isMetricsEnabled.value = false
-
+  
+  // camera.lookAt(new THREE.Vector3(0, 5, 0))
+  
   setTimeout(() => {
     // Loading completed, set isLoading to false
     store.isLoading.value = false
@@ -207,17 +274,14 @@ export async function provideProfileView() {
 } 
 export async function provideWindowView() {
   
-  store.isLoading.value = true
-  
   store.windowRef.value.children[1].visible = true;
   store.windowRef.value.children[2].visible = true;
   store.windowRef.value.children[3].visible = true;
+
+  console.log(store.windowRef.value)
   
-  store.windowRef.value.children[4].scale.y *= 2
-  store.windowRef.value.children[4].scale.z *= 2
-  
-  store.windowRef.value.children[0].position.z -= 23
-  store.windowRef.value.children[0].position.y -= 23
+  store.windowRef.value.children[4].position.y += 22.8 
+  store.windowRef.value.children[4].position.z += 22.5
   
   store.isMetricsEnabled.value = true
 

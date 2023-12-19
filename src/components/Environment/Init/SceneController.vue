@@ -31,6 +31,8 @@ onMounted(async () => {
   //Camera
   f.camera.position.set(0, 0, 22)
 
+  store.cameraFrontPosition.position.copy(f.camera.position)
+
   f.addToScene(f.camera)
 })
 </script>

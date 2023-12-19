@@ -11,84 +11,84 @@ export const limitPoints = <THREE.Object3D[]>[]
 
 export async function computeRehauGroup() {
 
-  // ---------------- Rehau Group Start
-  const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
+    // ---------------- Rehau Group Start
+    const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
 
-  const box3 = new THREE.Box3().setFromObject(product[0])
+    const box3 = new THREE.Box3().setFromObject(product[0])
 
-  const dimension = new THREE.Vector3()
-  box3.getSize(dimension)
+    const dimension = new THREE.Vector3()
+    box3.getSize(dimension)
 
-  const boundingIntesect = new THREE.Mesh(
-      new THREE.BoxGeometry(dimension.x, dimension.y, dimension.z),
-      new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
-  )
-
-  boundingIntesect.name = "boundingBox";
-  // Calculate the middle point of the bounding box
-  const middlePoint = new THREE.Vector3();
-  box3.getCenter(middlePoint);
-
-  boundingIntesect.position.set(
-    middlePoint.x, 
-    middlePoint.y,
-    middlePoint.z
+    const boundingIntesect = new THREE.Mesh(
+        new THREE.BoxGeometry(dimension.x, dimension.y, dimension.z),
+        new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
     )
 
-  product[0].add(boundingIntesect)
+    boundingIntesect.name = "boundingBox";
+    // Calculate the middle point of the bounding box
+    const middlePoint = new THREE.Vector3();
+    box3.getCenter(middlePoint);
 
-  boundingIntesect.visible = false
-  
-  // Calculate the end point of the bounding box along the Y-axis
-  const endZ = middlePoint.z + dimension.z / 6
-  const endY = middlePoint.y + dimension.y / 6.05
-  const startY = middlePoint.y - dimension.y / 6
-  const startZ = middlePoint.z - dimension.z / 6
+    boundingIntesect.position.set(
+        middlePoint.x,
+        middlePoint.y,
+        middlePoint.z
+    )
 
-  
-  // Create a red point light at the middle point
-  const sphere = new THREE.SphereGeometry( 0.5, 16, 8 );
-  const pointLight = new THREE.PointLight( 0x80ff80, 0.1 );
-  pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x80ff80 } ) ) );
-  pointLight.position.copy(middlePoint)
+    product[0].add(boundingIntesect)
 
-  const z_end_pointLight = new THREE.PointLight( 0xff0000, .1 );
-  z_end_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) ) );
-  z_end_pointLight.position.set(middlePoint.x, middlePoint.y, endZ)
+    boundingIntesect.visible = false
 
-  const y_end_pointLight = new THREE.PointLight( 0xff0000, .1 );
-  y_end_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) ) );
-  y_end_pointLight.position.set(middlePoint.x, endY, middlePoint.z)
+    // Calculate the end point of the bounding box along the Y-axis
+    const endZ = middlePoint.z + dimension.z / 6
+    const endY = middlePoint.y + dimension.y / 6.05
+    const startY = middlePoint.y - dimension.y / 6
+    const startZ = middlePoint.z - dimension.z / 6
 
-  const z_start_pointLight = new THREE.PointLight( 0xffff00, .1 );
-  z_start_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xffff00 } ) ) );
-  z_start_pointLight.position.set(middlePoint.x, middlePoint.y, startZ)
 
-  const y_start_pointLight = new THREE.PointLight( 0xffff00, .1 );
-  y_start_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xffff00 } ) ) );
-  y_start_pointLight.position.set(middlePoint.x, startY, middlePoint.z)
+    // Create a red point light at the middle point
+    //   const sphere = new THREE.SphereGeometry( 0.5, 16, 8 );
+    //   const pointLight = new THREE.PointLight( 0x80ff80, 0.1 );
+    //   pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x80ff80 } ) ) );
+    //   pointLight.position.copy(middlePoint)
 
-  const rehau_group = new THREE.Group();
+    //   const z_end_pointLight = new THREE.PointLight( 0xff0000, .1 );
+    //   z_end_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) ) );
+    //   z_end_pointLight.position.set(middlePoint.x, middlePoint.y, endZ)
 
-  rehau_group.add(product[0], boundingIntesect)
+    //   const y_end_pointLight = new THREE.PointLight( 0xff0000, .1 );
+    //   y_end_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) ) );
+    //   y_end_pointLight.position.set(middlePoint.x, endY, middlePoint.z)
 
-  return {group: rehau_group, middlePoint, startZ, endZ, startY, endY};
-  
-  // ---------------- Rehau Group Start
+    //   const z_start_pointLight = new THREE.PointLight( 0xffff00, .1 );
+    //   z_start_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xffff00 } ) ) );
+    //   z_start_pointLight.position.set(middlePoint.x, middlePoint.y, startZ)
+
+    //   const y_start_pointLight = new THREE.PointLight( 0xffff00, .1 );
+    //   y_start_pointLight.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xffff00 } ) ) );
+    //   y_start_pointLight.position.set(middlePoint.x, startY, middlePoint.z)
+
+    const rehau_group = new THREE.Group();
+
+    rehau_group.add(product[0], boundingIntesect)
+
+    return { group: rehau_group, middlePoint, startZ, endZ, startY, endY };
+
+    // ---------------- Rehau Group Start
 }
 
 export async function computeProduct() {
     const product_group = new THREE.Group()
 
-    const {...rehau_group} = await computeRehauGroup()
+    const { ...rehau_group } = await computeRehauGroup()
     product_group.add(rehau_group.group)
     gatherHelpers(rehau_group.group)
 
     store.profileRef.value = toRaw(rehau_group.group)
 
     //Get the Rehau Group here
-    for (let i=0; i<3; i++) {
-        const {...rehau_group} = await computeRehauGroup()
+    for (let i = 0; i < 3; i++) {
+        const { ...rehau_group } = await computeRehauGroup()
         switch (i) {
             case 0: {
                 const mirrored_rehau = cloneAndMirrorX(rehau_group.group);
@@ -114,7 +114,7 @@ export async function computeProduct() {
         }
     }
 
-    
+
 
     return product_group
 }
@@ -143,10 +143,10 @@ type Rehau = {
 }
 
 function gatherHelpers(group: THREE.Group) {
-    for(const child of group.children) {
-        if(child instanceof THREE.Object3D) {
+    for (const child of group.children) {
+        if (child instanceof THREE.Object3D) {
             if (child.name === "Rehau") fillMeshes.push(child)
-            else if(child.name === "boundingBox") boundingBoxes.push(child)
+            else if (child.name === "boundingBox") boundingBoxes.push(child)
             else limitPoints.push(child)
         }
     }

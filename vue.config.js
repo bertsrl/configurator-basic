@@ -3,8 +3,9 @@ module.exports = defineConfig({
   pluginOptions: {
     quasar: {
       importStrategy: 'kebab',
-      rtlSupport: false
-    }
+      rtlSupport: false,
+      notify: true
+    },    
   },
   transpileDependencies: [
     'quasar'

@@ -1,9 +1,19 @@
 <template>
-  <div :class="props.class" style="position: absolute; top: 10vh; right: -40%">
-    <div class="q-pa-md rounded-borders" style="width: 25vw">
+  <div
+    :class="props.class"
+    :style="{
+      position: 'absolute',
+      top: '10vh',
+      right: $q.screen.width >= 1200 ? '-40%' : $q.screen.width >= 600 ? '-65%' : 'auto'
+    }"
+  >
+    <div class="q-pa-md rounded-borders" style="width: inherit">
       <q-card class="my-card" flat bordered>
         <q-card-section>
-          <div class="text-h6">
+          <q-btn flat class="q-my-sm" @click="store.switchToMainPanel"
+            ><q-icon name="arrow_back" /> Back
+          </q-btn>
+          <div class="text-h6 q-pl-md">
             Configure {{ store.controlsArray[props.configPanelId].name }} Limits
           </div>
           <div class="row q-mb-sm items-start">
@@ -17,7 +27,7 @@
         </q-card-section>
       </q-card>
     </div>
-    <div class="q-pa-md rounded-borders" style="width: 25vw; z-index: 999">
+    <div class="q-pa-md rounded-borders" style="width: inherit; z-index: 999">
       <q-card class="my-card" flat bordered>
         <q-card-section>
           <!-- Slider component here -->
@@ -28,28 +38,20 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, defineProps, defineAsyncComponent } from 'vue'
+import { useQuasar } from 'quasar'
 import * as store from '@/store'
 
 import SliderComponent from '@/components/Controls/SizeControl/SliderComponent.vue'
 import SizeInputs from '@/components/Controls/SizeControl/SizeInputs.vue'
+
+const q = useQuasar()
 
 const props = withDefaults(
   defineProps<{
     class: string
     configPanelId: number
   }>(),
-  {
-    configPanelId: 0
-  }
+  {}
 )
-
-const panelMinSize = ref(0)
-const panelMaxSize = ref(30)
-const panelMinW = ref(0)
-const panelMaxW = ref(20)
-
-const mappedValue1030 = ref()
-const mappedValue01 = ref()
 </script>
 <style lang=""></style>

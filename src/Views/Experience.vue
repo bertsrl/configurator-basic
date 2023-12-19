@@ -59,7 +59,6 @@
     grid-template-areas:
       'navigation'
       'content';
-    height: 100vh;
     color: #000;
     width: 100vw;
   }
@@ -93,10 +92,13 @@
 
 <template>
   <div class="container" ref="main">
-    <q-btn style="position: absolute; top: 10vh; left: 10vw" @click="toggleTimeline"
+    <!-- <q-btn style="position: absolute; top: 10vh; left: 10vw" @click="switchToMainPanel()"
       >Test Transition</q-btn
-    >
-    <configure-panel class="card-transition" :config-panel-id="currentConfigPanelId" />
+    > -->
+    <configure-panel
+      :config-panel-id="store.currentConfigPanelId.value"
+      class="card-transition configure-panel"
+    />
     <!-- <q-card
       class="q-pa-md rounded-borders card-transition"
       style="width: 32vw; position: absolute; top: 10vh; right: -40%; z-index: 999"
@@ -109,67 +111,69 @@
       </q-card-section>
     </q-card> -->
     <div
-      class="q-pa-md rounded-borders card-transition"
-      :class="store.showCard2.value ? 'card-leave-to' : ''"
+      class="q-pa-md rounded-borders card-transition main-panel"
       style="width: 35vw; position: absolute; top: 10vh; right: 5vw"
     >
       <q-card class="my-card" id="control-card" flat bordered>
         <q-card-section>
-          <div class="text-h6">Our Changing Planet</div>
-          <div class="text-subtitle2">by John Doe</div>
+          <div class="settings-container q-pa-md">
+            <h6 v-if="!store.isProfileLook.value">Customize Product</h6>
+            <h6 v-else>
+              Detail drawings of windows and balcony doors Frame 86 GENEO® with sash Z57 GENEO® or
+              sash A57 GENEO®
+            </h6>
+          </div>
         </q-card-section>
 
-        <q-tabs v-model="tab" class="text-teal">
-          <q-tab label="Size Controls" name="one" />
-          <q-tab label="Color" name="two" />
-        </q-tabs>
+        <q-card-section v-if="!store.isProfileLook.value">
+          <q-tabs v-model="tab" class="text-teal">
+            <q-tab label="Size Controls" name="one" />
+            <q-tab label="Texture" name="two" />
+          </q-tabs>
 
-        <q-separator />
+          <q-separator />
 
-        <q-tab-panels v-model="tab" style="height: 65vh">
-          <q-tab-panel name="one">
-            <div style="height: 750px; width: 100%">
-              <div v-if="!store.isProfileLook.value">
-                <div class="settings-container q-pa-md">
-                  <h6>Customize Product</h6>
-                </div>
-                <div class="color-controls q-pa-md">
-                  <h6>Color Controls</h6>
-                  <color-control :options="colorOptions" v-model:color_value="hex" />
-                  <p style="margin-top: 2vh">Selected color: {{ hex }}</p>
-                </div>
-                <div class="size-controls q-pa-md row">
-                  <div class="controls-iter">
-                    <div class="text-h6 col-6">Size Controls</div>
-                    <div class="q-py-md text-h6">Width</div>
-                    <q-btn
-                      @click="
-                        () => {
-                          toggleTimeline()
-                          currentConfigPanelId = 0
-                        }
-                      "
-                    >
-                      Configure Limits
-                    </q-btn>
-                    <size-inputs :controlId="0" />
-                    <slider-component v-model:size-prop="changeWidth" :controlId="0" />
+          <q-tab-panels
+            v-model="tab"
+            :style="{
+              height: $q.screen.width >= 1200 ? '65vh' : $q.screen.width >= 600 ? '40vh' : 'auto'
+            }"
+          >
+            <q-tab-panel name="one">
+              <div style="width: 100%">
+                <div>
+                  <div class="size-controls q-pa-md row">
+                    <div class="controls-iter fit">
+                      <div class="text-h6 col-6">Size Controls</div>
+                      <div class="q-py-md text-h6">Width</div>
+                      <q-btn
+                        @click="
+                          () => {
+                            store.switchToMainPanel()
+                            store.currentConfigPanelId.value = 0
+                            store.configurePanelOpen.value = true
+                          }
+                        "
+                      >
+                        Configure Limits
+                      </q-btn>
+                      <slider-component v-model:size-prop="changeWidth" :control-id="0" />
 
-                    <div class="q-py-md text-h6">Height</div>
-                    <q-btn
-                      @click="
-                        () => {
-                          toggleTimeline()
-                          currentConfigPanelId = 1
-                        }
-                      "
-                    >
-                      Configure Limits
-                    </q-btn>
-                    <size-inputs :controlId="1" />
-                    <slider-component v-model:size-prop="changeHeight" :controlId="1" />
-                  </div>
-                  <!-- 
+                      <div class="q-py-md text-h6">Height</div>
+                      <q-btn
+                        @click="
+                          () => {
+                            store.switchToMainPanel()
+                            store.currentConfigPanelId.value = 1
+                            store.configurePanelOpen.value = true
+                          }
+                        "
+                      >
+                        Configure Limits
+                      </q-btn>
+                      <slider-component v-model:size-prop="changeHeight" :control-id="1" />
+                    </div>
+                    <!-- 
                   <size-control
                     title="Width"
                     class="col-12"
@@ -182,18 +186,20 @@
                     type="height"
                     v-model:size="changeHeight"
                   /> -->
+                  </div>
                 </div>
               </div>
-              <div v-else class="settings"><h6>No available options in Profile View</h6></div>
-            </div>
-          </q-tab-panel>
+            </q-tab-panel>
 
-          <q-tab-panel name="two">
-            With so much content to display at once, and often so little screen real-estate, Cards
-            have fast become the design pattern of choice for many companies, including the likes of
-            Google and Twitter.
-          </q-tab-panel>
-        </q-tab-panels>
+            <q-tab-panel name="two">
+              <div class="color-controls q-pa-md">
+                <color-control :options="colorOptions" v-model:color_value="hex" />
+                <!-- <p style="margin-top: 2vh">Selected color: {{ hex }}</p> -->
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-card-section>
+        <product-details v-else />
       </q-card>
     </div>
     <div
@@ -283,9 +289,12 @@ import * as store from '@/store'
 import * as meter from '@/components/Environment/Settings'
 import LoadingScreen from '@/components/Environment/Init/LoadingScreen.vue'
 import ConfigurePanel from './ConfigurePanel.vue'
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'
 
 import SizeInputs from '@/components/Controls/SizeControl/SizeInputs.vue'
 import SliderComponent from '@/components/Controls/SizeControl/SliderComponent.vue'
+import anime from 'animejs/lib/anime.es.js'
+import ProductDetails from './ProductDetails.vue'
 
 const minSize = ref(0)
 const maxSize = ref(30)
@@ -294,7 +303,7 @@ const maxW = ref(20)
 const mappedValue1030 = ref()
 const mappedValue01 = ref()
 
-const currentConfigPanelId = ref(1)
+const isMainPanel = ref(true)
 
 const hex = ref('')
 const colorOptions = ref([
@@ -303,6 +312,8 @@ const colorOptions = ref([
   { label: 'Blue', value: 'blue' },
   { label: 'Yellow', value: 'yellow' }
 ])
+
+const windowInitialTexture = ref<THREE.Texture[]>([])
 
 const changeWidth = ref(0)
 const changeHeight = ref(0)
@@ -316,13 +327,15 @@ const glassRef = reactive({
 const rendererRef = ref()
 const controlsRef = ref()
 
+const q = useQuasar()
+
 const myPoints = ref()
 myPoints.value = points
 
 const tab = ref('one')
 
 // Debug
-const gui = new dat.GUI()
+// const gui = new dat.GUI()
 
 // Variables for mouse drag
 let isDragging = false
@@ -332,33 +345,33 @@ let previousMousePosition = {
   y: 0
 }
 
-// Function to handle mouse down event
-function onMouseDown(event) {
-  isDragging = true
-  previousMousePosition = {
-    x: event.clientX,
-    y: event.clientY
-  }
-}
+// // Function to handle mouse down event
+// function onMouseDown(event) {
+//   isDragging = true
+//   previousMousePosition = {
+//     x: event.clientX,
+//     y: event.clientY
+//   }
+// }
 
-// Function to handle mouse move event
-function onMouseMove(event) {
-  if (!isDragging) return
+// // Function to handle mouse move event
+// function onMouseMove(event) {
+//   if (!isDragging) return
 
-  const deltaMove = {
-    x: event.clientX - previousMousePosition.x,
-    y: event.clientY - previousMousePosition.y
-  }
+//   const deltaMove = {
+//     x: event.clientX - previousMousePosition.x,
+//     y: event.clientY - previousMousePosition.y
+//   }
 
-  // Rotate the cube based on mouse movement
-  store.windowRef.value.rotation.y += deltaMove.x * 0.01
-  store.windowRef.value.rotation.x += deltaMove.y * 0.01
+//   // Rotate the cube based on mouse movement
+//   store.windowRef.value.rotation.y += deltaMove.x * 0.01
+//   store.windowRef.value.rotation.x += deltaMove.y * 0.01
 
-  previousMousePosition = {
-    x: event.clientX,
-    y: event.clientY
-  }
-}
+//   previousMousePosition = {
+//     x: event.clientX,
+//     y: event.clientY
+//   }
+// }
 
 // Function to handle mouse up event
 function onMouseUp() {
@@ -372,59 +385,55 @@ const limits = {
   maxWindowX: 0
 }
 
-function onMouseWheel(event) {
-  if (isOnScene) {
-    // Assuming limits.min and limits.max are defined
-    const minWindowZ = limits.minWindowZ
-    const maxWindowZ = limits.maxWindowZ
-    const minWindowX = limits.minWindowX
-    const maxWindowX = limits.maxWindowX
+// function onMouseWheel(event) {
+//   if (isOnScene) {
+//     // Assuming limits.min and limits.max are defined
+//     const minWindowZ = limits.minWindowZ
+//     const maxWindowZ = limits.maxWindowZ
+//     const minWindowX = limits.minWindowX
+//     const maxWindowX = limits.maxWindowX
 
-    store.windowRef.value.position.z += event.detail * 0.01
+//     store.windowRef.value.position.z += event.detail * 0.01
 
-    // Ensure the position.z stays within the limits
-    if (store.windowRef.value.position.z < minWindowZ) {
-      store.windowRef.value.position.z = minWindowZ
-    } else if (store.windowRef.value.position.z > maxWindowZ) {
-      store.windowRef.value.position.z = maxWindowZ
-    }
+//     // Ensure the position.z stays within the limits
+//     if (store.windowRef.value.position.z < minWindowZ) {
+//       store.windowRef.value.position.z = minWindowZ
+//     } else if (store.windowRef.value.position.z > maxWindowZ) {
+//       store.windowRef.value.position.z = maxWindowZ
+//     }
 
-    // Ensure the position.z stays within the limits
-    if (store.windowRef.value.position.x < minWindowX) {
-      store.windowRef.value.position.x = minWindowX
-    } else if (store.windowRef.value.position.z > maxWindowX) {
-      store.windowRef.value.position.x = maxWindowX
-    }
-    // Adjust position.x based on event.detail
-    store.windowRef.value.position.x += event.detail * 0.0001
-  }
-}
+//     // Ensure the position.z stays within the limits
+//     if (store.windowRef.value.position.x < minWindowX) {
+//       store.windowRef.value.position.x = minWindowX
+//     } else if (store.windowRef.value.position.z > maxWindowX) {
+//       store.windowRef.value.position.x = maxWindowX
+//     }
+//     // Adjust position.x based on event.detail
+//     store.windowRef.value.position.x += event.detail * 0.0001
+//   }
+// }
 
 const main = ref()
-let tl
-let ctx
 import gsap from 'gsap'
 import type { Control } from '@/types'
 import { matRemoveShoppingCart } from '@quasar/extras/material-icons'
 
-function toggleTimeline() {
-  tl.reversed(!tl.reversed())
-}
+import { app } from '@/firebase'
+import { getFirestore } from 'firebase/firestore'
+
+import { createApp } from 'vue'
 
 onMounted(async () => {
-  console.log(store.controlsArray)
-  ctx = gsap.context((self) => {
-    const cards = self.selector('.card-transition')
-    console.log(cards)
-    tl = gsap.timeline().to(cards[1], { xPercent: 150 }).to(cards[0], { xPercent: -200 }).reverse()
-  }, main.value) // <- Scope!
+  // ctx = gsap.context((self) => {
+  //   const cards = self.selector('.card-transition')
+  //   console.log(cards)
+  //   tl = gsap.timeline().to(cards[1], { xPercent: 150 }).to(cards[0], { xPercent: -200 }).reverse()
+  // }, main.value) // <- Scope!
 
   // Add event listeners
-  document.addEventListener('mousedown', onMouseDown, false)
-  document.addEventListener('mousemove', onMouseMove, false)
   document.addEventListener('mouseup', onMouseUp, false)
-  document.addEventListener('mousewheel', onMouseWheel, false)
-  document.addEventListener('MozMousePixelScroll', onMouseWheel, false)
+  // document.addEventListener('mousewheel', onMouseWheel, false)
+  // document.addEventListener('MozMousePixelScroll', onMouseWheel, false)
 
   const my_card = document.getElementById('control-card')
 
@@ -456,13 +465,17 @@ onMounted(async () => {
   const morphMeshes = await f.unwrapChildren(product_group)
   morphMeshesRef.value = morphMeshes
 
+  store.productLoaded.value = true
+
+  console.log('morphMeshesRef.value: ', morphMeshesRef.value)
+
   const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
 
   const glass = product[1]
   store.windowRef.value.add(toRaw(glass)) //TODO: De corectat chestia asta pentru ca provoaca probleme. Spre exemplu in ColorControl.vue trebuie sa adaug un if(... !== undefined)
 
-  limits.maxWindowZ = store.windowRef.value.position.z + 4
-  limits.minWindowZ = store.windowRef.value.position.z - 4
+  limits.maxWindowZ = store.windowRef.value.position.z + 2
+  limits.minWindowZ = store.windowRef.value.position.z - 2
   limits.maxWindowX = store.windowRef.value.position.x + 0.01
   limits.minWindowX = store.windowRef.value.position.x - 0.01
 
@@ -478,6 +491,12 @@ onMounted(async () => {
   glassRef.mesh = glass
   glassRef.initalSize = new THREE.Vector3(glass.scale.x, glass.scale.y, glass.scale.z)
 
+  console.log(toRaw(store.windowRef.value))
+
+  // await store.getControlsFromDB()
+
+  // console.log('AM REUSIT: ', store.controlsArray)
+
   const data = {
     scale: 0,
     boxScale: 1
@@ -487,7 +506,6 @@ onMounted(async () => {
     box.scale.z = 1 / 3
     box.scale.y = 1 / 3
   }
-
   // Adding Loaded Mesh full version in the back as a dummy
   // f.addToScene(await f.addDummy())
 
@@ -510,20 +528,34 @@ onMounted(async () => {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap // default THREE.PCFShadowMap
 
   // // Controls
-  // const controls = new OrbitControls(f.camera, canvas)
-  // controls.enableDamping = true
-  // // Disable screen dragging if store.isDraggable is false
+  const controls = new OrbitControls(f.camera, canvas)
+  controls.enableDamping = true
+  controls.enabled = false
 
-  // controlsRef.value = controls
+  controls.minDistance = 10
+  controls.maxDistance = 50
+
+  // gui.add(controls, 'enabled').name('Orbit Controls')
+  // Disable screen dragging if store.isDraggable is false
+
+  controlsRef.value = controls
+
+  console.log('Inainte de textMeshes: ', store.controlsArray)
+
   tick()
 })
 
 function tick() {
   //Update controls
-  // if (store.isDraggable.value) controlsRef.value.update()
+  if (store.isDraggable.value) controlsRef.value.update()
 
   // Render
   rendererRef.value.render(f.scene, f.camera)
+
+  if (store.isSphereLook.value) {
+    store.textMeshes.windowHeightText.lookAt(f.camera.position)
+    store.textMeshes.windowWidthText.lookAt(f.camera.position)
+  }
 
   window.requestAnimationFrame(tick)
 }
@@ -550,22 +582,114 @@ watch(store.windowChange, (newValue) => {
 const widthChanging = ref(false)
 const heightChanging = ref(false)
 
-watchEffect(() => {
-  if (store.isCameraswitchSelected.value) {
-    f.camera.position.set(0, 0, 11)
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
+import { useQuasar } from 'quasar'
+import { toneMapping } from 'three/examples/jsm/nodes/Nodes.js'
+
+watch(store.loggerText, (newVal, preVal) => {
+  if (newVal) {
+    toast.error(store.loggerText.value, {
+      autoClose: 20000,
+      position: toast.POSITION.BOTTOM_CENTER
+    }) // ToastOptions
   }
 })
 
+watch(store.activeTexture, async (newVal) => {
+  if (newVal.name !== 'Original') {
+    for (const rehau_group of store.windowRef.value.children) {
+      if (rehau_group instanceof THREE.Object3D) {
+        const rehau_profile = toRaw(rehau_group.children[0])
+
+        if (rehau_profile !== undefined)
+          for (const rehau_component of rehau_profile.children) {
+            if (
+              rehau_component instanceof THREE.Object3D &&
+              rehau_component.children[0] instanceof THREE.Mesh &&
+              rehau_component.children[1] instanceof THREE.Mesh &&
+              rehau_component.children[5] instanceof THREE.Mesh &&
+              rehau_component.children[7] instanceof THREE.Mesh &&
+              rehau_component.children[8] instanceof THREE.Mesh &&
+              rehau_component.children[9] instanceof THREE.Mesh
+            ) {
+              windowInitialTexture.value.push(rehau_component.children[0].material.map)
+              windowInitialTexture.value.push(rehau_component.children[1].material.map)
+              windowInitialTexture.value.push(rehau_component.children[5].material.map)
+              windowInitialTexture.value.push(rehau_component.children[7].material.map)
+              windowInitialTexture.value.push(rehau_component.children[8].material.map)
+              windowInitialTexture.value.push(rehau_component.children[9].material.map)
+            }
+          }
+      }
+    }
+
+    const texture = new THREE.TextureLoader().load(newVal.imageUrl)
+    texture.colorSpace = THREE.SRGBColorSpace
+
+    changePlasticColor(texture)
+
+    console.log('TEXTURA BA:', texture)
+    console.log('windowRef: ', store.windowRef.value)
+  } else {
+    for (const rehau_group of store.windowRef.value.children) {
+      if (rehau_group instanceof THREE.Object3D) {
+        const rehau_profile = toRaw(rehau_group.children[0])
+
+        if (rehau_profile !== undefined)
+          for (const rehau_component of rehau_profile.children) {
+            if (
+              rehau_component instanceof THREE.Object3D &&
+              rehau_component.children[0] instanceof THREE.Mesh &&
+              rehau_component.children[1] instanceof THREE.Mesh &&
+              rehau_component.children[5] instanceof THREE.Mesh &&
+              rehau_component.children[7] instanceof THREE.Mesh &&
+              rehau_component.children[8] instanceof THREE.Mesh &&
+              rehau_component.children[9] instanceof THREE.Mesh
+            ) {
+              rehau_component.children[0].material.map = windowInitialTexture.value[0]
+              rehau_component.children[1].material.map = windowInitialTexture.value[1]
+              rehau_component.children[5].material.map = windowInitialTexture.value[2]
+              rehau_component.children[7].material.map = windowInitialTexture.value[3]
+              rehau_component.children[8].material.map = windowInitialTexture.value[4]
+              rehau_component.children[9].material.map = windowInitialTexture.value[5]
+            }
+          }
+      }
+    }
+  }
+})
+
+function changePlasticColor(texture: THREE.Texture) {
+  for (const rehau_group of store.windowRef.value.children) {
+    if (rehau_group instanceof THREE.Object3D) {
+      const rehau_profile = toRaw(rehau_group.children[0])
+
+      if (rehau_profile !== undefined)
+        for (const rehau_component of rehau_profile.children) {
+          if (
+            rehau_component instanceof THREE.Object3D &&
+            rehau_component.children[0] instanceof THREE.Mesh &&
+            rehau_component.children[1] instanceof THREE.Mesh &&
+            rehau_component.children[5] instanceof THREE.Mesh &&
+            rehau_component.children[7] instanceof THREE.Mesh &&
+            rehau_component.children[8] instanceof THREE.Mesh &&
+            rehau_component.children[9] instanceof THREE.Mesh
+          ) {
+            rehau_component.children[0].material.map = texture
+            rehau_component.children[1].material.map = texture
+            rehau_component.children[5].material.map = texture
+            rehau_component.children[7].material.map = texture
+            rehau_component.children[8].material.map = texture
+            rehau_component.children[9].material.map = texture
+          }
+        }
+    }
+  }
+}
+
 watch(store.isProfileLook, (newVal) => {
   if (newVal) {
-    f.camera.position.set(-3, 3, 0)
-
-    glassRef.mesh.scale.set(
-      toRaw(glassRef.initalSize.x),
-      toRaw(glassRef.initalSize.y),
-      toRaw(glassRef.initalSize.z)
-    )
-
     for (const mesh of morphMeshesRef.value) {
       if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
         mesh.morphTargetInfluences[0] = 0
@@ -573,19 +697,164 @@ watch(store.isProfileLook, (newVal) => {
       }
     }
 
+    controlsRef.value.enabled = true
+
+    gsap.to(f.camera.position, {
+      x: -10,
+      z: 4,
+      y: 3
+    })
+
+    const worldProfileMiddle = new THREE.Vector3()
+    if (store.windowRef.value.children[0] instanceof THREE.Object3D)
+      store.windowRef.value.children[0].getWorldPosition(worldProfileMiddle)
+
+    gsap.to(controlsRef.value.target, {
+      x: worldProfileMiddle.x - 0.25,
+      y: worldProfileMiddle.y - 1,
+      z: worldProfileMiddle.z
+    })
+
+    f.camera.setViewOffset(q.screen.width, q.screen.height, 300, 2, q.screen.width, q.screen.height)
+
+    glassRef.mesh.scale.copy(glassRef.initalSize)
+
     f.provideProfileView()
+  } else {
+    f.camera.setViewOffset(q.screen.width, q.screen.height, 0, 0, q.screen.width, q.screen.height)
+    initWindowLook()
   }
 })
-watch(store.isWindowLook, (newVal) => {
-  if (newVal) {
-    f.camera.position.set(0, 0, 11)
 
-    changeWidth.value = 0
-    changeHeight.value = 0
+watch(store.isSphereLook, (newVal) => {
+  if (newVal === true) {
+    controlsRef.value.enabled = true
 
-    f.provideWindowView()
+    console.log('Sphere View!')
+    gsap.to(store.windowRef.value.position, {
+      x: 0
+    })
+
+    gsap.to(store.meters.x.position, {
+      x: 0
+    })
+    gsap.to(store.meters.y.position, {
+      x: store.windowRef.value.position.x + 4.2
+    })
+
+    gsap.to(store.textMeshes.windowWidthText.position, {
+      x: 0
+    })
+
+    gsap.to(store.textMeshes.windowHeightText.position, {
+      x: store.meters.y.position.x + 2.85
+    })
+
+    anime({
+      targets: '.card-transition',
+      translateX: [0, 800]
+    })
+  } else {
+    controlsRef.value.enabled = false
+
+    gsap.to(f.camera.position, {
+      x: store.cameraFrontPosition.position.x,
+      y: store.cameraFrontPosition.position.y,
+      z: store.cameraFrontPosition.position.z,
+      onUpdate: () => {
+        store.textMeshes.windowHeightText.lookAt(f.camera.position)
+        store.textMeshes.windowWidthText.lookAt(f.camera.position)
+      },
+      onComplete: () => {
+        // f.camera.position.copy(store.cameraFrontPosition.position)
+        store.windowRef.value.lookAt(f.camera.position)
+        store.windowRef.value.rotation.y += Math.PI / 2 - 0.1
+      }
+    })
+
+    gsap.to(store.meters.y.position, {
+      x: store.cameraFrontPosition.position.x - 1.2
+    })
+
+    gsap.to(store.meters.x.position, {
+      x: store.cameraFrontPosition.position.x - 2.7
+    })
+
+    gsap.to(store.textMeshes.windowWidthText.position, {
+      x: store.cameraFrontPosition.position.x - 2.7
+    })
+
+    gsap.to(store.textMeshes.windowHeightText.position, {
+      x: store.cameraFrontPosition.position.x - 1
+    })
+
+    anime({
+      targets: '.card-transition',
+      translateX: [800, 0]
+    })
+
+    gsap.to(store.windowRef.value.position, {
+      x: -2.7
+    })
   }
 })
+
+function initWindowLook() {
+  // changeWidth.value = store.controlsArray.find((val) => val.name === 'Width')?.mappedValue01!
+  // changeHeight.value = store.controlsArray.find((val) => val.name === 'Height')?.mappedValue01!
+
+  gsap.to(f.camera.position, {
+    x: store.cameraFrontPosition.position.x,
+    y: store.cameraFrontPosition.position.y,
+    z: store.cameraFrontPosition.position.z,
+    onUpdate: () => {
+      store.textMeshes.windowHeightText.lookAt(f.camera.position)
+      store.textMeshes.windowWidthText.lookAt(f.camera.position)
+    },
+    onComplete: () => {
+      // f.camera.position.copy(store.cameraFrontPosition.position)
+      store.windowRef.value.lookAt(f.camera.position)
+      store.windowRef.value.rotation.y += Math.PI / 2 - 0.1
+    }
+  })
+
+  gsap.to(controlsRef.value.target, {
+    x: 0,
+    y: 0,
+    z: 0
+  })
+
+  // Map data.scale to box scale between 1/3 and 1
+  const minGlassSizeY = glassRef.initalSize.y
+  const maxGlassSizeY = 10
+
+  const mappedGlassScaleY = minGlassSizeY + changeWidth.value * (maxGlassSizeY - minGlassSizeY)
+
+  glassRef.mesh.scale.y = mappedGlassScaleY
+
+  // Map data.scale to box scale between 1/3 and 1
+  const minGlassSizeZ = glassRef.initalSize.z
+  const maxGlassSizeZ = 10
+
+  const mappedGlassScaleZ = minGlassSizeZ + changeHeight.value * (maxGlassSizeZ - minGlassSizeZ)
+
+  glassRef.mesh.scale.z = mappedGlassScaleZ
+
+  for (const mesh of morphMeshesRef.value) {
+    if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+      mesh.morphTargetInfluences[0] = changeWidth.value
+    }
+  }
+  for (const mesh of morphMeshesRef.value) {
+    if (mesh instanceof THREE.Mesh && mesh.morphTargetInfluences) {
+      mesh.morphTargetInfluences[1] = changeHeight.value
+    }
+  }
+
+  console.log(store.controlsArray)
+
+  f.provideWindowView()
+}
 
 watch(store.isMetricsEnabled, (newVal) => {
   if (newVal) {

@@ -1,57 +1,78 @@
 <template>
   <div class="toolbox" style="border-radius: 50%">
-    <q-list dark bordered separator class="no-border">
-      <q-item clickable v-ripple @click="store.windowChange.value = true">
-        <q-item-section>
-          <q-icon size="32px" color="primary" name="restart_alt" />
-          <q-item-label>Reset</q-item-label>
-        </q-item-section>
-      </q-item>
+    <div class="column q-gutter-md fit">
+      <!-- Reset Button -->
+      <div class="column q-gutter-sm toolbox-btn">
+        <q-btn
+          size="20px"
+          round
+          color="grey-10"
+          icon="restart_alt"
+          @click="store.windowChange.value = true"
+        />
+        <label class="text-center">Reset</label>
+      </div>
 
-      <q-item clickable v-ripple>
-        <q-item-section>
-          <q-icon size="42px" color="primary" name="" />
-          <q-item-label>Drag</q-item-label>
-        </q-item-section>
-      </q-item>
+      <!-- 360 Buttons -->
+      <div class="column q-gutter-sm toolbox-btn" v-if="!store.isSphereLook.value">
+        <q-btn
+          size="20px"
+          round
+          color="grey-10"
+          icon="360"
+          @click="store.isSphereLook.value = sphereLook"
+        />
+        <label class="text-center">360 View</label>
+      </div>
 
-      <q-item
-        clickable
-        v-ripple
-        @click="store.isMetricsEnabled.value = metricsVisibility"
-        :disable="store.isProfileLook.value ? true : false"
-      >
-        <q-item-section>
-          <q-item-section>
-            <q-icon size="32px" color="primary" name="square_foot" />
-            <q-item-label>Metrics</q-item-label>
-          </q-item-section>
-        </q-item-section>
-      </q-item>
+      <div class="column q-gutter-sm toolbox-btn" v-else>
+        <q-btn
+          size="20px"
+          round
+          color="grey-10"
+          :icon="!store.isSphereLook.value ? '360' : 'flip_to_back'"
+          @click="store.isSphereLook.value = sphereLook"
+        />
+        <label v-if="!store.isSphereLook.value" class="text-center">360 View</label>
+        <label v-else class="text-center">Front View</label>
+      </div>
 
-      <q-item
-        v-if="!store.isProfileLook.value"
-        clickable
-        v-ripple
-        @click="store.isProfileLook.value = profileLook"
-      >
-        <q-item-section>
-          <q-item-section>
-            <q-icon size="32px" color="primary" name="crop_free" />
-            <q-item-label>Profile</q-item-label>
-          </q-item-section>
-        </q-item-section>
-      </q-item>
+      <!-- Meters Buttons -->
+      <div class="column q-gutter-sm toolbox-btn">
+        <q-btn
+          size="20px"
+          round
+          color="grey-10"
+          icon="square_foot"
+          @click="store.isMetricsEnabled.value = metricsVisibility"
+          :disable="store.isProfileLook.value ? true : false"
+        />
+        <label class="text-center" v-if="store.isMetricsEnabled.value">Hide Meters</label>
+        <label class="text-center" v-else>Show Meters</label>
+      </div>
 
-      <q-item v-else clickable v-ripple @click="store.isWindowLook.value = windowLook">
-        <q-item-section>
-          <q-item-section>
-            <q-icon size="32px" color="primary" name="window" />
-            <q-item-label>Window</q-item-label>
-          </q-item-section>
-        </q-item-section>
-      </q-item>
-    </q-list>
+      <!-- View Buttons -->
+      <div class="column q-gutter-sm toolbox-btn" v-if="!store.isProfileLook.value">
+        <q-btn
+          size="20px"
+          round
+          color="grey-10"
+          icon="crop_free"
+          @click="store.isProfileLook.value = profileLook"
+        />
+        <label class="text-center">Profile View</label>
+      </div>
+      <div class="column q-gutter-sm toolbox-btn" v-else>
+        <q-btn
+          size="20px"
+          round
+          color="grey-10"
+          icon="crop_free"
+          @click="store.isProfileLook.value = profileLook"
+        />
+        <label class="text-center">Window View</label>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -68,12 +89,11 @@ const metricsVisibility = computed(() => {
 })
 
 const profileLook = computed(() => {
-  store.isWindowLook.value = false
   return store.isProfileLook.value ? false : true
 })
-const windowLook = computed(() => {
-  store.isProfileLook.value = false
-  return store.isWindowLook.value ? false : true
+
+const sphereLook = computed(() => {
+  return store.isSphereLook.value ? false : true
 })
 </script>
 <style lang="scss" scoped>
@@ -81,7 +101,7 @@ const windowLook = computed(() => {
   .toolbox {
     position: absolute;
     left: 1vw;
-    top: 18vh;
+    top: 3vh;
     .q-list {
       display: flex;
       flex-direction: column;
@@ -102,13 +122,19 @@ const windowLook = computed(() => {
         padding: 0.8vh 2.7vw;
       }
     }
+    .toolbox-btn {
+      width: 3.5vw !important;
+    }
   }
 }
 @media only screen and (min-width: 992px) {
   .toolbox {
     position: absolute;
     left: 1vw;
-    top: 35%;
+    top: 23vh;
+    .toolbox-btn {
+      width: 3.5vw !important;
+    }
     .q-list {
       display: flex;
       flex-direction: column;
