@@ -56,7 +56,6 @@ watch(fieldValue, (newVal, preVal) => {
   if (newVal !== props.activeValue) {
     bgColor.value = 'lime-6'
     changeProducedValue.value = true
-    console.log('changedProducedValue: ', changeProducedValue.value, props.activeValue)
   } else {
     bgColor.value = ''
     changeProducedValue.value = false

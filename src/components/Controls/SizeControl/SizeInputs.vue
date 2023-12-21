@@ -109,8 +109,6 @@ const props = withDefaults(
   {}
 )
 
-console.log('Props.controlId SizeInputs: ', props.controlId)
-
 // const localMinSize = ref(store.controlsArray[props.controlId].minSize)
 // const localMaxSize = ref(store.controlsArray[props.controlId].maxSize)
 // const localMinW = ref(store.controlsArray[props.controlId].minW)
@@ -127,7 +125,6 @@ const changeProduced = reactive({
 const enableSubmit = ref(false)
 
 // watch(changeProduced, (newVal, preVal) => {
-//   console.log('changeProduced: ', newVal)
 //   if (
 //     newVal.minSize === true ||
 //     newVal.maxSize === true ||
@@ -142,10 +139,8 @@ const enableSubmit = ref(false)
 // })
 
 function checkErrors() {
-  console.log('checkErrors: ', errors)
   if (errors.minSize || errors.maxSize || errors.minW || errors.maxW || errors.displayed) {
     enableSubmit.value = false
-    console.log('I-am dat disable')
   } else if (
     changeProduced.minSize ||
     changeProduced.maxSize ||
@@ -220,8 +215,6 @@ async function updateInputsData() {
     type: 'slider'
   }
 
-  console.log(newValues)
-
   await store.updateControlsFromDB(store.controlsArray[props.controlId].name, newValues)
 
   changeProduced.minW = false
@@ -276,8 +269,6 @@ watch(localDisplayed, (newVal, preVal) => {
 // VALIDATIONS
 function validateMinSize(value: number) {
   const visibleMaxSizeValue = newMaxSize.value ? newMaxSize.value : activeMaxSize.value
-
-  console.log('activa MaxSize: ', activeMaxSize.value, visibleMaxSizeValue)
 
   const verdict = value < visibleMaxSizeValue ? true : false
 

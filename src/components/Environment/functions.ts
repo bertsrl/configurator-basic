@@ -175,7 +175,6 @@ export async function unwrapChildren(window: THREE.Object3D) {
   // store.textMeshes.windowHeightText.position.y += 70
   // store.textMeshes.windowWidthText.position.z += 70
 
-  // console.log("Window: ", window)
   
   // meterX.scale.set(40, 50, 50)
   // meterY.scale.set(50, 40, 50)
@@ -190,7 +189,6 @@ export async function unwrapChildren(window: THREE.Object3D) {
   store.meters.x = meterX
   store.meters.y = meterY
   
-  console.log("window: ", window)
   store.windowRef.value = window 
   
   let index = 0;
@@ -243,7 +241,6 @@ export async function provideProfileView() {
   store.windowRef.value.children[2].visible = false;
   store.windowRef.value.children[3].visible = false;
 
-  console.log(store.windowRef.value)
   
   store.windowRef.value.children[4].scale.y /= 2
   store.windowRef.value.children[4].scale.z /= 2
@@ -253,7 +250,6 @@ export async function provideProfileView() {
 
   // store.windowRef.value.children[4].scale.x -= 0.1
 
-  // console.log("Profile: ", toRaw(store.windowRef.value))
   
   // store.windowRef.value.children[0].position.y += 22.8
   // store.windowRef.value.children[0].position.z += 22.5
@@ -278,7 +274,6 @@ export async function provideWindowView() {
   store.windowRef.value.children[2].visible = true;
   store.windowRef.value.children[3].visible = true;
 
-  console.log(store.windowRef.value)
   
   store.windowRef.value.children[4].position.y += 22.8 
   store.windowRef.value.children[4].position.z += 22.5

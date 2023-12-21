@@ -101,7 +101,6 @@ export const loggerText = ref('')
 export function toggleCards() {
   showCard1.value = !showCard1.value
   showCard2.value = !showCard2.value
-  console.log(showCard1.value, showCard2.value)
 }
 
 export const controlsArray = reactive(<Control[]>[
@@ -121,7 +120,6 @@ export async function getControlsFromDB() {
     const updatedObject = controlsArray.find(obj => obj.name === dbDocName);
 
     if (updatedObject) {
-      console.log(doc.data().name, " ",   doc.data().minSize)
       controlsArray[updatedObject.id].minSize = doc.data().minSize
       controlsArray[updatedObject.id].maxSize = doc.data().maxSize
       controlsArray[updatedObject.id].minW = doc.data().minW
@@ -142,7 +140,6 @@ export const currentConfigPanelId = ref(0)
 import { getFirestore } from 'firebase/firestore/lite'
 
 export async function updateControlsFromDB(name: string, data: any) {
-  console.log("dbRef.value", dbRef.value)
   const docRef = collection(dbRef.value, 'Controls')
 
   const q = query(docRef, where("name", "==", name));
@@ -150,17 +147,10 @@ export async function updateControlsFromDB(name: string, data: any) {
     const querySnapshot = await getDocs(q)
 
     querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data());
         updateDoc(doc.ref, data) 
     })
 
 }
-
-watch(controlsArray[0], (newVal) => {
-  if (newVal.maxSize) {
-    console.log(newVal)
-  }
-})
 
 
 

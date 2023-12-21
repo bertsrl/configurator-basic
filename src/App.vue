@@ -9,7 +9,6 @@ onBeforeMount(async () => {
   store.dbRef.value = await getFirestore(app)
   await store.getControlsFromDB()
 
-  console.log('App onBeforeMount: ', store.controlsArray)
 })
 </script>
 

@@ -426,7 +426,6 @@ import { createApp } from 'vue'
 onMounted(async () => {
   // ctx = gsap.context((self) => {
   //   const cards = self.selector('.card-transition')
-  //   console.log(cards)
   //   tl = gsap.timeline().to(cards[1], { xPercent: 150 }).to(cards[0], { xPercent: -200 }).reverse()
   // }, main.value) // <- Scope!
 
@@ -467,8 +466,6 @@ onMounted(async () => {
 
   store.productLoaded.value = true
 
-  console.log('morphMeshesRef.value: ', morphMeshesRef.value)
-
   const product = await loadData('./models/Dora/profile_extended_with_glass(2).glb')
 
   const glass = product[1]
@@ -491,11 +488,7 @@ onMounted(async () => {
   glassRef.mesh = glass
   glassRef.initalSize = new THREE.Vector3(glass.scale.x, glass.scale.y, glass.scale.z)
 
-  console.log(toRaw(store.windowRef.value))
-
   // await store.getControlsFromDB()
-
-  // console.log('AM REUSIT: ', store.controlsArray)
 
   const data = {
     scale: 0,
@@ -539,8 +532,6 @@ onMounted(async () => {
   // Disable screen dragging if store.isDraggable is false
 
   controlsRef.value = controls
-
-  console.log('Inainte de textMeshes: ', store.controlsArray)
 
   tick()
 })
@@ -629,9 +620,6 @@ watch(store.activeTexture, async (newVal) => {
     texture.colorSpace = THREE.SRGBColorSpace
 
     changePlasticColor(texture)
-
-    console.log('TEXTURA BA:', texture)
-    console.log('windowRef: ', store.windowRef.value)
   } else {
     for (const rehau_group of store.windowRef.value.children) {
       if (rehau_group instanceof THREE.Object3D) {
@@ -734,7 +722,6 @@ watch(store.isSphereLook, (newVal) => {
   if (newVal === true) {
     controlsRef.value.enabled = true
 
-    console.log('Sphere View!')
     gsap.to(store.windowRef.value.position, {
       x: 0,
       onUpdate: () => {
@@ -853,8 +840,6 @@ function initWindowLook() {
     }
   }
 
-  console.log(store.controlsArray)
-
   f.provideWindowView()
 }
 
@@ -873,7 +858,6 @@ watch(store.isMetricsEnabled, (newVal) => {
 })
 
 watch(changeWidth, (newVal, oldVal) => {
-  console.log('BAAA Experience', changeWidth)
   if (newVal !== oldVal && !heightChanging.value) {
     widthChanging.value = true
 

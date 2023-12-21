@@ -194,15 +194,6 @@ function checkWarranty() {
     else if (store.controlsArray[props.controlId].mappedValue1030 === undefined) return true
     return false
   })
-  console.log(
-    'mappedValue1030: ',
-    store.controlsArray[props.controlId].mappedValue1030,
-    'minW: ',
-    store.controlsArray[props.controlId].minW,
-    'maxW: ',
-    store.controlsArray[props.controlId].maxW
-  )
-  console.log('WAARRANTYY: ', warranty.value)
   return warranty.value
 }
 
@@ -222,15 +213,11 @@ watch(
 
 watchEffect(() => {
   if (store.controlsArray[props.controlId]?.mappedValue1030) {
-    console.log('mappedValue1030 s-a schimbat')
     const percentage =
       (store.controlsArray[props.controlId].mappedValue1030 -
         store.controlsArray[props.controlId].minSize) /
       (store.controlsArray[props.controlId].maxSize - store.controlsArray[props.controlId].minSize)
     store.controlsArray[props.controlId].mappedValue01 = Math.min(1, Math.max(0, percentage))
-
-    console.log('percentage: ', percentage)
-    console.log(store.controlsArray[props.controlId].mappedValue01)
 
     switch (props.controlId) {
       case 0:
@@ -244,7 +231,6 @@ watchEffect(() => {
     }
   }
   if (store.controlsArray[props.controlId].mappedValue01) {
-    console.log('Size.value: ', size.value)
     size.value = store.controlsArray[props.controlId].mappedValue01!
   }
 })
